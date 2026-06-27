@@ -1,10 +1,12 @@
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import config from './config/env.js';
-
-dotenv.config();
+import authRoutes from './routes/auth.js';
+import productRoutes from './routes/products.js';
+import categoryRoutes from './routes/categories.js';
+import cartRoutes from './routes/cart.js';
+import orderRoutes from './routes/orders.js';
 
 const app = express();
 const startTime = Date.now();
@@ -24,6 +26,12 @@ app.use(express.urlencoded({ extended: true }));
 await connectDB();
 
 // API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/orders', orderRoutes);
+
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'OK',
