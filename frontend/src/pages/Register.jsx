@@ -78,6 +78,8 @@ const Register = () => {
             errors[err.field] = err.message;
           });
           setFormErrors(errors);
+        } else if (response.message && response.message.toLowerCase().includes('email')) {
+          setFormErrors({ email: response.message });
         }
         toast.error(response.message || 'Registration failed');
       }
