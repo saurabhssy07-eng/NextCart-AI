@@ -85,6 +85,10 @@ export const login = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Account locked due to too many failed attempts. Try again later.' });
     }
 
+    if (!user.isEmailVerified) {
+      return res.status(403).json({ success: false, message: 'Please verify your email before logging in.', requiresVerification: true });
+    }
+
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
       user.loginAttempts += 1;
@@ -250,6 +254,37 @@ export const verifyEmail = async (req, res) => {
     res.status(200).json({ success: true, message: 'Email verified successfully' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error verifying email' });
+  }
+};
+
+export const resendVerification = async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email.toLowerCase() });
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (user.isEmailVerified) {
+      return res.status(400).json({ success: false, message: 'Email is already verified' });
+    }
+
+    const verifyToken = user.createEmailVerificationToken();
+    await user.save({ validateBeforeSave: false });
+
+    const verifyURL = `${config.frontendUrl}/verify-email/${verifyToken}`;
+    
+    try {
+      await new Email(user, verifyURL).sendVerificationEmail();
+      res.status(200).json({ success: true, message: 'Verification email resent successfully!' });
+    } catch (err) {
+      user.verificationToken = undefined;
+      user.verificationTokenExpires = undefined;
+      await user.save({ validateBeforeSave: false });
+      return res.status(500).json({ success: false, message: 'There was an error sending the email. Try again later!' });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error resending verification email' });
   }
 };
 

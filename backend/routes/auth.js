@@ -43,6 +43,10 @@ router.post('/forgot-password', forgotPasswordLimiter, [
 
 router.patch('/reset-password/:token', passwordResetValidation, authController.resetPassword);
 router.get('/verify-email/:token', authController.verifyEmail);
+router.post('/resend-verification', [
+  check('email', 'Please include a valid email').isEmail(),
+  validateRequest
+], authController.resendVerification);
 
 // Protected routes
 router.use(protect);

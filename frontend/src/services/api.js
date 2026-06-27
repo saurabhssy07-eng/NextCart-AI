@@ -34,8 +34,13 @@ const customFetch = async (url, options = {}) => {
     }
   }
 
-  // Check if response is ok, if not we still return json but it has success: false
-  return response.json();
+  const data = await response.json();
+  if (!response.ok && data.errors && data.errors.length > 0) {
+    // If multiple errors, we just show the first one in the toast by default
+    // Components can use data.errors to highlight fields
+    data.message = data.errors[0].message;
+  }
+  return data;
 };
 
 // ============= AUTH SERVICES =============
@@ -96,6 +101,13 @@ export const authService = {
   verifyEmail: async (token) => {
     return customFetch(`${API_BASE_URL}/auth/verify-email/${token}`, {
       method: 'GET',
+    });
+  },
+
+  resendVerification: async (email) => {
+    return customFetch(`${API_BASE_URL}/auth/resend-verification`, {
+      method: 'POST',
+      body: JSON.stringify({ email }),
     });
   }
 };

@@ -30,8 +30,8 @@ const GoogleLoginButton = () => {
 
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
     return (
-      <div className="w-full text-center text-sm text-gray-500 bg-gray-100 dark:bg-gray-800 p-2 rounded">
-        Google Login Disabled (Missing Client ID)
+      <div className="w-full text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
+        Google sign-in is currently unavailable.
       </div>
     );
   }
