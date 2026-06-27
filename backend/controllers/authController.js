@@ -65,7 +65,10 @@ export const register = async (req, res) => {
       console.log('Error sending verification email', err);
     }
 
-    createSendToken(newUser, 201, res, 'Registration successful. Please verify your email.');
+    res.status(201).json({
+      success: true,
+      message: 'Registration successful. Please check your email to verify your account.',
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error registering user', error: error.message });
   }

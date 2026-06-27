@@ -69,9 +69,8 @@ const Register = () => {
       const response = await authService.register(formData);
 
       if (response.success) {
-        dispatch(setUser(response.user));
-        toast.success(response.message || 'Registration successful!');
-        navigate('/');
+        toast.success(response.message || 'Registration successful! Please check your email.');
+        navigate('/login');
       } else {
         if (response.errors) {
           const errors = {};
