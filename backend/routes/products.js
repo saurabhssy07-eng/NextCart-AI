@@ -8,7 +8,7 @@ import {
   getFeaturedProducts,
   getProductsByCategory,
 } from '../controllers/productController.js';
-import { authenticate, authorize } from '../middleware/auth.js';
+import { protect, restrictTo } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -19,8 +19,8 @@ router.get('/category/:categoryId', getProductsByCategory);
 router.get('/:id', getProductById);
 
 // Protected routes (Admin only)
-router.post('/', authenticate, authorize('admin'), createProduct);
-router.put('/:id', authenticate, authorize('admin'), updateProduct);
-router.delete('/:id', authenticate, authorize('admin'), deleteProduct);
+router.post('/', protect, restrictTo('ADMIN', 'SUPER_ADMIN'), createProduct);
+router.put('/:id', protect, restrictTo('ADMIN', 'SUPER_ADMIN'), updateProduct);
+router.delete('/:id', protect, restrictTo('ADMIN', 'SUPER_ADMIN'), deleteProduct);
 
 export default router;

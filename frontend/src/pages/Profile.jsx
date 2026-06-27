@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { authService } from '../services/api';
-import { setUser, setTokens } from '../store/authSlice';
+import { setUser } from '../store/authSlice';
 
 const Profile = () => {
   const dispatch = useDispatch();

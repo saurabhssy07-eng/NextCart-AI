@@ -7,12 +7,12 @@ import {
   cancelOrder,
   getAllOrders,
 } from '../controllers/orderController.js';
-import { authenticate, authorize } from '../middleware/auth.js';
+import { protect, restrictTo } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // All order routes require authentication
-router.use(authenticate);
+router.use(protect);
 
 // User routes
 router.post('/', createOrder);
@@ -21,7 +21,7 @@ router.get('/:id', getOrderById);
 router.put('/:id/cancel', cancelOrder);
 
 // Admin routes
-router.get('/admin/all', authorize('admin'), getAllOrders);
-router.put('/:id/status', authorize('admin'), updateOrderStatus);
+router.get('/admin/all', restrictTo('ADMIN', 'SUPER_ADMIN'), getAllOrders);
+router.put('/:id/status', restrictTo('ADMIN', 'SUPER_ADMIN'), updateOrderStatus);
 
 export default router;

@@ -7,12 +7,12 @@ import {
   clearCart,
   applyCoupon,
 } from '../controllers/cartController.js';
-import { authenticate } from '../middleware/auth.js';
+import { protect } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // All cart routes require authentication
-router.use(authenticate);
+router.use(protect);
 
 router.get('/', getCart);
 router.post('/add', addToCart);

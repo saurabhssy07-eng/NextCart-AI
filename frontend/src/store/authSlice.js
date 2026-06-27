@@ -2,11 +2,10 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   user: null,
-  accessToken: localStorage.getItem('accessToken') || null,
-  refreshToken: localStorage.getItem('refreshToken') || null,
+  // We no longer store tokens in localStorage or redux state since they are HttpOnly cookies
   isLoading: false,
   error: null,
-  isAuthenticated: !!localStorage.getItem('accessToken'),
+  isAuthenticated: false, // This will be set by the /me endpoint or login success
 };
 
 const authSlice = createSlice({
@@ -15,16 +14,7 @@ const authSlice = createSlice({
   reducers: {
     setUser: (state, action) => {
       state.user = action.payload;
-    },
-    setTokens: (state, action) => {
-      const { accessToken, refreshToken } = action.payload;
-      state.accessToken = accessToken;
-      state.refreshToken = refreshToken;
-      state.isAuthenticated = true;
-      localStorage.setItem('accessToken', accessToken);
-      if (refreshToken) {
-        localStorage.setItem('refreshToken', refreshToken);
-      }
+      state.isAuthenticated = !!action.payload;
     },
     setLoading: (state, action) => {
       state.isLoading = action.payload;
@@ -34,12 +24,8 @@ const authSlice = createSlice({
     },
     logout: (state) => {
       state.user = null;
-      state.accessToken = null;
-      state.refreshToken = null;
       state.isAuthenticated = false;
       state.error = null;
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
     },
     clearError: (state) => {
       state.error = null;
@@ -47,5 +33,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { setUser, setTokens, setLoading, setError, logout, clearError } = authSlice.actions;
+export const { setUser, setLoading, setError, logout, clearError } = authSlice.actions;
 export default authSlice.reducer;

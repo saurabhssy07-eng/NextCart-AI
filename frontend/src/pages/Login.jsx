@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
-import { setUser, setTokens, setLoading } from '../store/authSlice';
+import { setUser, setLoading } from '../store/authSlice';
 import { authService } from '../services/api';
+import GoogleLoginButton from '../components/GoogleLoginButton';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -37,10 +38,6 @@ const Login = () => {
       const response = await authService.login(formData);
 
       if (response.success) {
-        dispatch(setTokens({
-          accessToken: response.accessToken,
-          refreshToken: response.refreshToken,
-        }));
         dispatch(setUser(response.user));
         toast.success('Login successful!');
         navigate('/');
@@ -76,14 +73,19 @@ const Login = () => {
           </div>
 
           <div>
-            <label className="block text-gray-700 font-medium mb-2">Password</label>
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-gray-700 dark:text-gray-300 font-medium">Password</label>
+              <Link to="/forgot-password" className="text-sm text-blue-600 hover:underline">
+                Forgot password?
+              </Link>
+            </div>
             <input
               type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter your password"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               required
             />
           </div>
@@ -96,6 +98,14 @@ const Login = () => {
             {isLoading ? 'Logging in...' : 'Login'}
           </button>
         </form>
+
+        <div className="mt-4 flex items-center justify-between">
+          <span className="border-b w-1/5 lg:w-1/4 dark:border-gray-600"></span>
+          <span className="text-xs text-center text-gray-500 dark:text-gray-400 uppercase">or login with</span>
+          <span className="border-b w-1/5 lg:w-1/4 dark:border-gray-600"></span>
+        </div>
+
+        <GoogleLoginButton />
 
         <p className="text-center text-gray-600 dark:text-gray-400 mt-4">
           Don't have an account?{' '}

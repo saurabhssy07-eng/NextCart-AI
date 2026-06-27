@@ -1,251 +1,259 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
-const getHeaders = (token = null) => {
-  const headers = {
+const getHeaders = () => {
+  return {
     'Content-Type': 'application/json',
   };
+};
 
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
+// Custom fetch wrapper to handle HttpOnly cookies and 401 Refresh Token logic
+const customFetch = async (url, options = {}) => {
+  options.credentials = 'include'; // Ensures HttpOnly cookies are sent
+  options.headers = { ...getHeaders(), ...options.headers };
+
+  let response = await fetch(url, options);
+
+  // If unauthorized (and not trying to login/refresh), attempt refresh
+  if (response.status === 401 && !url.includes('/auth/login') && !url.includes('/auth/refresh-token')) {
+    try {
+      const refreshRes = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
+        method: 'POST',
+        headers: getHeaders(),
+        credentials: 'include'
+      });
+      
+      if (refreshRes.ok) {
+        // Retry the original request
+        response = await fetch(url, options);
+      } else {
+        // Dispatch event so Redux can log the user out
+        window.dispatchEvent(new Event('auth:unauthorized'));
+      }
+    } catch (err) {
+      window.dispatchEvent(new Event('auth:unauthorized'));
+    }
   }
 
-  return headers;
+  // Check if response is ok, if not we still return json but it has success: false
+  return response.json();
 };
 
 // ============= AUTH SERVICES =============
 export const authService = {
   register: async (userData) => {
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+    return customFetch(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
-      headers: getHeaders(),
       body: JSON.stringify(userData),
     });
-    return response.json();
   },
 
   login: async (credentials) => {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    return customFetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
-      headers: getHeaders(),
       body: JSON.stringify(credentials),
     });
-    return response.json();
   },
 
-  refreshToken: async (refreshToken) => {
-    const response = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
+  googleLogin: async (idToken) => {
+    return customFetch(`${API_BASE_URL}/auth/google-login`, {
       method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({ refreshToken }),
+      body: JSON.stringify({ idToken }),
     });
-    return response.json();
   },
 
-  getCurrentUser: async (token) => {
-    const response = await fetch(`${API_BASE_URL}/auth/me`, {
-      method: 'GET',
-      headers: getHeaders(token),
+  logout: async () => {
+    return customFetch(`${API_BASE_URL}/auth/logout`, {
+      method: 'POST',
     });
-    return response.json();
   },
+
+  refreshToken: async () => {
+    return customFetch(`${API_BASE_URL}/auth/refresh-token`, {
+      method: 'POST',
+    });
+  },
+
+  getCurrentUser: async () => {
+    return customFetch(`${API_BASE_URL}/auth/me`, {
+      method: 'GET',
+    });
+  },
+
+  forgotPassword: async (email) => {
+    return customFetch(`${API_BASE_URL}/auth/forgot-password`, {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  resetPassword: async (token, password) => {
+    return customFetch(`${API_BASE_URL}/auth/reset-password/${token}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ password }),
+    });
+  },
+
+  verifyEmail: async (token) => {
+    return customFetch(`${API_BASE_URL}/auth/verify-email/${token}`, {
+      method: 'GET',
+    });
+  }
 };
 
 // ============= PRODUCT SERVICES =============
 export const productService = {
   getAllProducts: async (params = {}) => {
     const queryString = new URLSearchParams(params).toString();
-    const response = await fetch(`${API_BASE_URL}/products?${queryString}`);
-    return response.json();
+    return customFetch(`${API_BASE_URL}/products?${queryString}`);
   },
 
   getProductById: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/products/${id}`);
-    return response.json();
+    return customFetch(`${API_BASE_URL}/products/${id}`);
   },
 
   getFeaturedProducts: async () => {
-    const response = await fetch(`${API_BASE_URL}/products/featured`);
-    return response.json();
+    return customFetch(`${API_BASE_URL}/products/featured`);
   },
 
   getProductsByCategory: async (categoryId, params = {}) => {
     const queryString = new URLSearchParams(params).toString();
-    const response = await fetch(`${API_BASE_URL}/products/category/${categoryId}?${queryString}`);
-    return response.json();
+    return customFetch(`${API_BASE_URL}/products/category/${categoryId}?${queryString}`);
   },
 
-  createProduct: async (productData, token) => {
-    const response = await fetch(`${API_BASE_URL}/products`, {
+  createProduct: async (productData) => {
+    return customFetch(`${API_BASE_URL}/products`, {
       method: 'POST',
-      headers: getHeaders(token),
       body: JSON.stringify(productData),
     });
-    return response.json();
   },
 
-  updateProduct: async (id, productData, token) => {
-    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+  updateProduct: async (id, productData) => {
+    return customFetch(`${API_BASE_URL}/products/${id}`, {
       method: 'PUT',
-      headers: getHeaders(token),
       body: JSON.stringify(productData),
     });
-    return response.json();
   },
 
-  deleteProduct: async (id, token) => {
-    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+  deleteProduct: async (id) => {
+    return customFetch(`${API_BASE_URL}/products/${id}`, {
       method: 'DELETE',
-      headers: getHeaders(token),
     });
-    return response.json();
   },
 };
 
 // ============= CATEGORY SERVICES =============
 export const categoryService = {
   getAllCategories: async () => {
-    const response = await fetch(`${API_BASE_URL}/categories`);
-    return response.json();
+    return customFetch(`${API_BASE_URL}/categories`);
   },
 
   getCategoryById: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/categories/${id}`);
-    return response.json();
+    return customFetch(`${API_BASE_URL}/categories/${id}`);
   },
 
-  createCategory: async (categoryData, token) => {
-    const response = await fetch(`${API_BASE_URL}/categories`, {
+  createCategory: async (categoryData) => {
+    return customFetch(`${API_BASE_URL}/categories`, {
       method: 'POST',
-      headers: getHeaders(token),
       body: JSON.stringify(categoryData),
     });
-    return response.json();
   },
 
-  updateCategory: async (id, categoryData, token) => {
-    const response = await fetch(`${API_BASE_URL}/categories/${id}`, {
+  updateCategory: async (id, categoryData) => {
+    return customFetch(`${API_BASE_URL}/categories/${id}`, {
       method: 'PUT',
-      headers: getHeaders(token),
       body: JSON.stringify(categoryData),
     });
-    return response.json();
   },
 
-  deleteCategory: async (id, token) => {
-    const response = await fetch(`${API_BASE_URL}/categories/${id}`, {
+  deleteCategory: async (id) => {
+    return customFetch(`${API_BASE_URL}/categories/${id}`, {
       method: 'DELETE',
-      headers: getHeaders(token),
     });
-    return response.json();
   },
 };
 
 // ============= CART SERVICES =============
 export const cartService = {
-  getCart: async (token) => {
-    const response = await fetch(`${API_BASE_URL}/cart`, {
+  getCart: async () => {
+    return customFetch(`${API_BASE_URL}/cart`, {
       method: 'GET',
-      headers: getHeaders(token),
     });
-    return response.json();
   },
 
-  addToCart: async (productId, quantity, token) => {
-    const response = await fetch(`${API_BASE_URL}/cart/add`, {
+  addToCart: async (productId, quantity) => {
+    return customFetch(`${API_BASE_URL}/cart/add`, {
       method: 'POST',
-      headers: getHeaders(token),
       body: JSON.stringify({ productId, quantity }),
     });
-    return response.json();
   },
 
-  updateCartItem: async (productId, quantity, token) => {
-    const response = await fetch(`${API_BASE_URL}/cart/update`, {
+  updateCartItem: async (productId, quantity) => {
+    return customFetch(`${API_BASE_URL}/cart/update`, {
       method: 'PUT',
-      headers: getHeaders(token),
       body: JSON.stringify({ productId, quantity }),
     });
-    return response.json();
   },
 
-  removeFromCart: async (productId, token) => {
-    const response = await fetch(`${API_BASE_URL}/cart/remove/${productId}`, {
+  removeFromCart: async (productId) => {
+    return customFetch(`${API_BASE_URL}/cart/remove/${productId}`, {
       method: 'DELETE',
-      headers: getHeaders(token),
     });
-    return response.json();
   },
 
-  clearCart: async (token) => {
-    const response = await fetch(`${API_BASE_URL}/cart/clear`, {
+  clearCart: async () => {
+    return customFetch(`${API_BASE_URL}/cart/clear`, {
       method: 'DELETE',
-      headers: getHeaders(token),
     });
-    return response.json();
   },
 
-  applyCoupon: async (couponCode, discount, token) => {
-    const response = await fetch(`${API_BASE_URL}/cart/apply-coupon`, {
+  applyCoupon: async (couponCode, discount) => {
+    return customFetch(`${API_BASE_URL}/cart/apply-coupon`, {
       method: 'POST',
-      headers: getHeaders(token),
       body: JSON.stringify({ couponCode, discount }),
     });
-    return response.json();
   },
 };
 
 // ============= ORDER SERVICES =============
 export const orderService = {
-  createOrder: async (orderData, token) => {
-    const response = await fetch(`${API_BASE_URL}/orders`, {
+  createOrder: async (orderData) => {
+    return customFetch(`${API_BASE_URL}/orders`, {
       method: 'POST',
-      headers: getHeaders(token),
       body: JSON.stringify(orderData),
     });
-    return response.json();
   },
 
-  getUserOrders: async (params = {}, token) => {
+  getUserOrders: async (params = {}) => {
     const queryString = new URLSearchParams(params).toString();
-    const response = await fetch(`${API_BASE_URL}/orders?${queryString}`, {
+    return customFetch(`${API_BASE_URL}/orders?${queryString}`, {
       method: 'GET',
-      headers: getHeaders(token),
     });
-    return response.json();
   },
 
-  getOrderById: async (id, token) => {
-    const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
+  getOrderById: async (id) => {
+    return customFetch(`${API_BASE_URL}/orders/${id}`, {
       method: 'GET',
-      headers: getHeaders(token),
     });
-    return response.json();
   },
 
-  cancelOrder: async (id, token) => {
-    const response = await fetch(`${API_BASE_URL}/orders/${id}/cancel`, {
+  cancelOrder: async (id) => {
+    return customFetch(`${API_BASE_URL}/orders/${id}/cancel`, {
       method: 'PUT',
-      headers: getHeaders(token),
     });
-    return response.json();
   },
 
-  getAllOrders: async (params = {}, token) => {
+  getAllOrders: async (params = {}) => {
     const queryString = new URLSearchParams(params).toString();
-    const response = await fetch(`${API_BASE_URL}/orders/admin/all?${queryString}`, {
+    return customFetch(`${API_BASE_URL}/orders/admin/all?${queryString}`, {
       method: 'GET',
-      headers: getHeaders(token),
     });
-    return response.json();
   },
 
-  updateOrderStatus: async (id, statusData, token) => {
-    const response = await fetch(`${API_BASE_URL}/orders/${id}/status`, {
+  updateOrderStatus: async (id, statusData) => {
+    return customFetch(`${API_BASE_URL}/orders/${id}/status`, {
       method: 'PUT',
-      headers: getHeaders(token),
       body: JSON.stringify(statusData),
     });
-    return response.json();
   },
 };
 

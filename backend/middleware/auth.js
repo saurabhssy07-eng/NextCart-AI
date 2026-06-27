@@ -2,47 +2,59 @@ import jwt from 'jsonwebtoken';
 import { User } from '../models/index.js';
 import config from '../config/env.js';
 
-export const authenticate = async (req, res, next) => {
+export const protect = async (req, res, next) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
+    let token;
+    
+    // Check HttpOnly Cookie first, fallback to Bearer header
+    if (req.cookies && req.cookies.accessToken) {
+      token = req.cookies.accessToken;
+    } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
 
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'Authorization token is required',
+        message: 'You are not logged in! Please log in to get access.',
       });
     }
 
+    // Verify token
     const decoded = jwt.verify(token, config.jwtSecret);
-    const user = await User.findById(decoded.id);
 
-    if (!user) {
+    // Check if user still exists
+    const currentUser = await User.findById(decoded.id);
+    if (!currentUser) {
       return res.status(401).json({
         success: false,
-        message: 'User not found',
+        message: 'The user belonging to this token does no longer exist.',
       });
     }
 
-    req.user = {
-      id: user._id,
-      role: user.role,
-    };
+    // GRANT ACCESS TO PROTECTED ROUTE
+    req.user = currentUser;
     next();
   } catch (error) {
-    console.error('❌ Auth error:', error.message);
-    res.status(401).json({
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({
+        success: false,
+        message: 'Your token has expired! Please log in again.',
+      });
+    }
+    return res.status(401).json({
       success: false,
-      message: 'Invalid or expired token',
+      message: 'Invalid token. Please log in again.',
     });
   }
 };
 
-export const authorize = (...roles) => {
+export const restrictTo = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
-        message: 'Unauthorized access - Admin only',
+        message: 'You do not have permission to perform this action',
       });
     }
     next();

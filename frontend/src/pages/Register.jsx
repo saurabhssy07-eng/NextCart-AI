@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
-import { setUser, setTokens, setLoading } from '../store/authSlice';
+import { setUser, setLoading } from '../store/authSlice';
 import { authService } from '../services/api';
+import GoogleLoginButton from '../components/GoogleLoginButton';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -51,12 +52,8 @@ const Register = () => {
       const response = await authService.register(formData);
 
       if (response.success) {
-        dispatch(setTokens({
-          accessToken: response.accessToken,
-          refreshToken: response.refreshToken,
-        }));
         dispatch(setUser(response.user));
-        toast.success('Registration successful!');
+        toast.success(response.message || 'Registration successful!');
         navigate('/');
       } else {
         toast.error(response.message || 'Registration failed');
@@ -104,40 +101,41 @@ const Register = () => {
           </div>
 
           <div>
-            <label className="block text-gray-700 font-medium mb-2">Email</label>
+            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2">Email</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               placeholder="your@email.com"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               required
             />
           </div>
 
           <div>
-            <label className="block text-gray-700 font-medium mb-2">Password</label>
+            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2">Password</label>
             <input
               type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter your password"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               required
             />
+            <p className="text-xs text-gray-500 mt-1">Must be 8+ chars with uppercase, lowercase, number, and special character.</p>
           </div>
 
           <div>
-            <label className="block text-gray-700 font-medium mb-2">Confirm Password</label>
+            <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2">Confirm Password</label>
             <input
               type="password"
               name="passwordConfirm"
               value={formData.passwordConfirm}
               onChange={handleChange}
               placeholder="Confirm your password"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               required
             />
           </div>
@@ -150,6 +148,14 @@ const Register = () => {
             {isLoading ? 'Creating Account...' : 'Register'}
           </button>
         </form>
+
+        <div className="mt-4 flex items-center justify-between">
+          <span className="border-b w-1/5 lg:w-1/4 dark:border-gray-600"></span>
+          <span className="text-xs text-center text-gray-500 dark:text-gray-400 uppercase">or register with</span>
+          <span className="border-b w-1/5 lg:w-1/4 dark:border-gray-600"></span>
+        </div>
+
+        <GoogleLoginButton />
 
         <p className="text-center text-gray-600 dark:text-gray-400 mt-4">
           Already have an account?{' '}

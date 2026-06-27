@@ -1,0 +1,261 @@
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import { OAuth2Client } from 'google-auth-library';
+import { User } from '../models/index.js';
+import config from '../config/env.js';
+import Email from '../utils/email.js';
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const signToken = (id, secret, expiresIn) => {
+  return jwt.sign({ id }, secret, { expiresIn });
+};
+
+const createSendToken = (user, statusCode, res, message) => {
+  const accessToken = signToken(user._id, config.jwtSecret, '15m');
+  const refreshToken = signToken(user._id, config.jwtRefreshSecret, '30d');
+
+  const cookieOptions = {
+    expires: new Date(Date.now() + 15 * 60 * 1000), // 15m
+    httpOnly: true,
+    secure: config.nodeEnv === 'production',
+    sameSite: 'Lax',
+  };
+
+  const refreshCookieOptions = {
+    expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30d
+    httpOnly: true,
+    secure: config.nodeEnv === 'production',
+    sameSite: 'Lax',
+  };
+
+  res.cookie('accessToken', accessToken, cookieOptions);
+  res.cookie('refreshToken', refreshToken, refreshCookieOptions);
+
+  res.status(statusCode).json({
+    success: true,
+    message,
+    user: user.toJSON(),
+  });
+};
+
+export const register = async (req, res) => {
+  try {
+    const { firstName, lastName, email, password } = req.body;
+
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(409).json({ success: false, message: 'Email already registered' });
+    }
+
+    const newUser = await User.create({
+      firstName,
+      lastName,
+      email: email.toLowerCase(),
+      password,
+    });
+
+    const verifyToken = newUser.createEmailVerificationToken();
+    await newUser.save({ validateBeforeSave: false });
+
+    const verifyURL = `${config.frontendUrl}/verify-email/${verifyToken}`;
+    try {
+      await new Email(newUser, verifyURL).sendVerificationEmail();
+    } catch (err) {
+      console.log('Error sending verification email', err);
+    }
+
+    createSendToken(newUser, 201, res, 'Registration successful. Please verify your email.');
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error registering user', error: error.message });
+  }
+};
+
+export const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email: email.toLowerCase() }).select('+password +loginAttempts +lockUntil');
+
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+    }
+
+    if (user.isLocked()) {
+      return res.status(401).json({ success: false, message: 'Account locked due to too many failed attempts. Try again later.' });
+    }
+
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) {
+      user.loginAttempts += 1;
+      if (user.loginAttempts >= 5) {
+        user.lockUntil = Date.now() + 15 * 60 * 1000;
+      }
+      await user.save({ validateBeforeSave: false });
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+    }
+
+    user.loginAttempts = 0;
+    user.lockUntil = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    console.log(`✅ Login Success: ${user.email}`);
+    createSendToken(user, 200, res, 'Login successful');
+  } catch (error) {
+    console.log(`❌ Login Error:`, error.message);
+    res.status(500).json({ success: false, message: 'Error logging in', error: error.message });
+  }
+};
+
+export const logout = (req, res) => {
+  res.cookie('accessToken', 'loggedout', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+  res.cookie('refreshToken', 'loggedout', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+  res.status(200).json({ success: true, message: 'Logged out successfully' });
+};
+
+export const refreshToken = async (req, res) => {
+  try {
+    const token = req.cookies.refreshToken;
+    if (!token) {
+      return res.status(401).json({ success: false, message: 'Refresh token is required' });
+    }
+
+    const decoded = jwt.verify(token, config.jwtRefreshSecret);
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'User not found' });
+    }
+
+    createSendToken(user, 200, res, 'Token refreshed');
+  } catch (error) {
+    res.status(401).json({ success: false, message: 'Invalid or expired refresh token' });
+  }
+};
+
+export const googleLogin = async (req, res) => {
+  try {
+    const { idToken } = req.body;
+    if (!process.env.GOOGLE_CLIENT_ID) {
+      return res.status(400).json({ success: false, message: 'Google Login is currently disabled on the server.' });
+    }
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    
+    let user = await User.findOne({ email: payload.email });
+
+    if (!user) {
+      user = await User.create({
+        firstName: payload.given_name,
+        lastName: payload.family_name || ' ',
+        email: payload.email,
+        googleId: payload.sub,
+        isEmailVerified: payload.email_verified,
+        avatar: payload.picture,
+      });
+      console.log(`✅ Google Login (New User): ${user.email}`);
+    } else {
+      if (!user.googleId) {
+        user.googleId = payload.sub;
+        await user.save({ validateBeforeSave: false });
+      }
+      console.log(`✅ Google Login (Existing User): ${user.email}`);
+    }
+
+    createSendToken(user, 200, res, 'Google Login successful');
+  } catch (error) {
+    console.error('Google Login Error:', error.message);
+    res.status(401).json({ success: false, message: 'Google authentication failed' });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'There is no user with that email address.' });
+    }
+
+    const resetToken = user.createPasswordResetToken();
+    await user.save({ validateBeforeSave: false });
+
+    const resetURL = `${config.frontendUrl}/reset-password/${resetToken}`;
+
+    try {
+      await new Email(user, resetURL).sendPasswordReset();
+      res.status(200).json({ success: true, message: 'Token sent to email!' });
+    } catch (err) {
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpires = undefined;
+      await user.save({ validateBeforeSave: false });
+      return res.status(500).json({ success: false, message: 'There was an error sending the email. Try again later!' });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error in forgot password' });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: 'Token is invalid or has expired' });
+    }
+
+    user.password = req.body.password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    createSendToken(user, 200, res, 'Password reset successful');
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error resetting password' });
+  }
+};
+
+export const verifyEmail = async (req, res) => {
+  try {
+    const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+
+    const user = await User.findOne({
+      verificationToken: hashedToken,
+      verificationTokenExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: 'Token is invalid or has expired' });
+    }
+
+    user.isEmailVerified = true;
+    user.verificationToken = undefined;
+    user.verificationTokenExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({ success: true, message: 'Email verified successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error verifying email' });
+  }
+};
+
+export const getMe = async (req, res) => {
+  res.status(200).json({
+    success: true,
+    user: req.user,
+  });
+};

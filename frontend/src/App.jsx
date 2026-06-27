@@ -4,6 +4,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import store from './store';
 import { ThemeProvider } from './context/ThemeContext';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 // Pages
 import Login from './pages/Login';
@@ -11,6 +12,9 @@ import Register from './pages/Register';
 import Home from './pages/Home';
 import Products from './pages/Products';
 import ProductDetails from './pages/ProductDetails';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import VerifyEmail from './pages/VerifyEmail';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
@@ -27,11 +31,14 @@ import './App.css';
 import './index.css';
 
 function App() {
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'dummy-client-id';
+
   return (
     <Provider store={store}>
       <ThemeProvider>
-        <Router>
-          <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors">
+        <GoogleOAuthProvider clientId={googleClientId}>
+          <Router>
+            <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors">
             <Navbar />
             <main className="flex-1">
               <Routes>
@@ -39,6 +46,9 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password/:token" element={<ResetPassword />} />
+                <Route path="/verify-email/:token" element={<VerifyEmail />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/products/:id" element={<ProductDetails />} />
 
@@ -99,6 +109,7 @@ function App() {
             <Footer />
           </div>
         </Router>
+        </GoogleOAuthProvider>
         <ToastContainer position="bottom-right" autoClose={3000} theme="colored" />
       </ThemeProvider>
     </Provider>

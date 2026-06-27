@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcryptjs from 'bcryptjs';
+import crypto from 'crypto';
 
 const userSchema = new mongoose.Schema(
   {
@@ -24,9 +25,17 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, 'Please provide a password'],
-      minlength: 6,
+      // Not required for Google Login
+      required: function() {
+        return !this.googleId;
+      },
+      minlength: 8,
       select: false,
+    },
+    googleId: {
+      type: String,
+      sparse: true,
+      unique: true,
     },
     phone: {
       type: String,
@@ -38,13 +47,43 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['user', 'admin'],
-      default: 'user',
+      enum: ['SUPER_ADMIN', 'ADMIN', 'VENDOR', 'CUSTOMER'],
+      default: 'CUSTOMER',
     },
     isActive: {
       type: Boolean,
       default: true,
     },
+    // Email verification
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken: String,
+    verificationTokenExpires: Date,
+    // Password reset
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
+    // Account lock out and rate limiting
+    loginAttempts: {
+      type: Number,
+      default: 0,
+      select: false,
+    },
+    lockUntil: {
+      type: Date,
+      select: false,
+    },
+    // Session tracking prep
+    sessions: [
+      {
+        token: String,
+        device: String,
+        ip: String,
+        browser: String,
+        lastActive: { type: Date, default: Date.now },
+      }
+    ],
     address: {
       street: String,
       locality: String,
@@ -75,7 +114,9 @@ const userSchema = new mongoose.Schema(
 
 // Hash password before saving
 userSchema.pre('save', async function (next) {
+  // Only run this if password was actually modified
   if (!this.isModified('password')) return next();
+  if (!this.password) return next();
 
   try {
     const salt = await bcryptjs.genSalt(10);
@@ -88,13 +129,55 @@ userSchema.pre('save', async function (next) {
 
 // Method to compare passwords
 userSchema.methods.comparePassword = async function (enteredPassword) {
+  if (!this.password) return false;
   return await bcryptjs.compare(enteredPassword, this.password);
 };
 
-// Method to get user without password
+// Check if account is locked
+userSchema.methods.isLocked = function() {
+  return !!(this.lockUntil && this.lockUntil > Date.now());
+};
+
+// Generate Reset Password Token
+userSchema.methods.createPasswordResetToken = function() {
+  const resetToken = crypto.randomBytes(32).toString('hex');
+
+  this.resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  // Token valid for 15 minutes
+  this.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
+  
+  return resetToken;
+};
+
+// Generate Email Verification Token
+userSchema.methods.createEmailVerificationToken = function() {
+  const verificationToken = crypto.randomBytes(32).toString('hex');
+
+  this.verificationToken = crypto
+    .createHash('sha256')
+    .update(verificationToken)
+    .digest('hex');
+
+  // Token valid for 24 hours
+  this.verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000;
+  
+  return verificationToken;
+};
+
+// Method to get user without sensitive data
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
   delete obj.password;
+  delete obj.loginAttempts;
+  delete obj.lockUntil;
+  delete obj.resetPasswordToken;
+  delete obj.resetPasswordExpires;
+  delete obj.verificationToken;
+  delete obj.verificationTokenExpires;
   return obj;
 };
 
