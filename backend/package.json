@@ -19,6 +19,7 @@
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.10.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
@@ -28,7 +29,9 @@
     "google-auth-library": "^10.9.0",
     "jsonwebtoken": "^9.0.1",
     "mongoose": "^7.2.0",
-    "nodemailer": "^9.0.1"
+    "multer": "^2.2.0",
+    "nodemailer": "^9.0.1",
+    "streamifier": "^0.1.1"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

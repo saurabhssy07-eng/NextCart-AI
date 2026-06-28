@@ -13,7 +13,7 @@ export const getAllProducts = async (req, res) => {
     }
 
     if (search && search.trim().length > 0) {
-      filter.$text = { $search: search };
+      filter.name = { $regex: search, $options: 'i' };
     }
 
     const products = await Product.find(filter)

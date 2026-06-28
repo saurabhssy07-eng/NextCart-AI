@@ -37,6 +37,37 @@ const productSchema = new mongoose.Schema(
         url: String,
       },
     ],
+    variants: [
+      {
+        sku: String,
+        attributes: {
+          type: Map,
+          of: String,
+        },
+        price: Number,
+        compareAtPrice: Number,
+        stock: {
+          type: Number,
+          default: 0,
+        },
+        images: [
+          {
+            url: String,
+          },
+        ],
+        weight: Number,
+        barcode: String,
+        status: {
+          type: String,
+          enum: ['active', 'draft'],
+          default: 'active',
+        },
+        isDefault: {
+          type: Boolean,
+          default: false,
+        },
+      }
+    ],
     stock: {
       type: Number,
       required: [true, 'Please provide stock quantity'],
@@ -57,6 +88,13 @@ const productSchema = new mongoose.Schema(
     reviews: {
       type: Number,
       default: 0,
+    },
+    ratingDistribution: {
+      5: { type: Number, default: 0 },
+      4: { type: Number, default: 0 },
+      3: { type: Number, default: 0 },
+      2: { type: Number, default: 0 },
+      1: { type: Number, default: 0 },
     },
     specifications: {
       type: Map,

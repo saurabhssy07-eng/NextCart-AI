@@ -20,6 +20,19 @@ export default {
           800: '#1e40af',
           900: '#1e3a8a',
         },
+        secondary: '#64748b',
+        accent: '#f59e0b',
+        surface: {
+          light: '#ffffff',
+          dark: '#1f2937',
+        },
+        border: {
+          light: '#e5e7eb',
+          dark: '#374151',
+        },
+        success: '#10b981',
+        warning: '#f59e0b',
+        danger: '#ef4444',
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',

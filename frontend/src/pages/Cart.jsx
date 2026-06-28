@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { setCart, removeItem, updateItemQuantity, clearCart } from '../store/cartSlice';
 import { cartService } from '../services/api';
+import EmptyState from '../components/ui/EmptyState';
+import { ShoppingCart } from 'lucide-react';
 
 const Cart = () => {
   const dispatch = useDispatch();
@@ -26,14 +28,14 @@ const Cart = () => {
     }
   };
 
-  const handleUpdateQuantity = async (productId, newQuantity) => {
+  const handleUpdateQuantity = async (productId, variantId, newQuantity) => {
     if (newQuantity < 1) {
-      handleRemoveItem(productId);
+      handleRemoveItem(productId, variantId);
       return;
     }
 
     try {
-      const response = await cartService.updateCartItem(productId, newQuantity, accessToken);
+      const response = await cartService.updateCartItem(productId, newQuantity, variantId);
       if (response.success) {
         dispatch(setCart(response.data));
         toast.success('Cart updated');
@@ -43,9 +45,9 @@ const Cart = () => {
     }
   };
 
-  const handleRemoveItem = async (productId) => {
+  const handleRemoveItem = async (productId, variantId) => {
     try {
-      const response = await cartService.removeFromCart(productId, accessToken);
+      const response = await cartService.removeFromCart(productId, variantId);
       if (response.success) {
         dispatch(setCart(response.data));
         toast.success('Item removed');
@@ -74,12 +76,13 @@ const Cart = () => {
       <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
 
       {items.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-600 text-lg mb-4">Your cart is empty</p>
-          <Link to="/" className="text-blue-600 hover:underline">
-            Continue Shopping
-          </Link>
-        </div>
+        <EmptyState
+          icon={ShoppingCart}
+          title="Your cart is empty"
+          description="Looks like you haven't added anything to your cart yet."
+          actionLabel="Start Shopping"
+          onAction={() => navigate('/products')}
+        />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
@@ -97,14 +100,23 @@ const Cart = () => {
                 </thead>
                 <tbody>
                   {items.map((item) => (
-                    <tr key={item.product._id} className="border-t">
+                    <tr key={`${item.product._id}-${item.variantId || 'base'}`} className="border-t border-border-light dark:border-border-dark">
                       <td className="px-6 py-4">
                         <Link
-                          to={`/products/${item.product._id}`}
-                          className="text-blue-600 hover:underline"
+                          to={`/products/${item.product._id}${item.selectedOptions ? `?${new URLSearchParams(item.selectedOptions).toString()}` : ''}`}
+                          className="text-primary-600 dark:text-primary-400 hover:underline font-medium block mb-1"
                         >
                           {item.product.name}
                         </Link>
+                        {item.selectedOptions && Object.keys(item.selectedOptions).length > 0 && (
+                          <div className="text-sm text-gray-500 flex flex-wrap gap-x-3 gap-y-1 mt-1">
+                            {Object.entries(item.selectedOptions).map(([key, val]) => (
+                              <span key={key} className="bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-md text-xs">
+                                <span className="font-medium text-gray-700 dark:text-gray-300">{key}:</span> {val}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </td>
                       <td className="text-center px-6 py-4">
                         <input
@@ -112,9 +124,9 @@ const Cart = () => {
                           min="1"
                           value={item.quantity}
                           onChange={(e) =>
-                            handleUpdateQuantity(item.product._id, parseInt(e.target.value))
+                            handleUpdateQuantity(item.product._id, item.variantId, parseInt(e.target.value))
                           }
-                          className="w-16 px-2 py-1 border border-gray-300 rounded text-center"
+                          className="w-16 px-2 py-1 border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark rounded text-center focus:ring-1 focus:ring-primary-500"
                         />
                       </td>
                       <td className="text-right px-6 py-4">₹{item.price.toLocaleString('en-IN')}</td>
@@ -123,8 +135,9 @@ const Cart = () => {
                       </td>
                       <td className="text-center px-6 py-4">
                         <button
-                          onClick={() => handleRemoveItem(item.product._id)}
-                          className="text-red-600 hover:text-red-800"
+                          onClick={() => handleRemoveItem(item.product._id, item.variantId)}
+                          className="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20"
+                          title="Remove item"
                         >
                           🗑️
                         </button>

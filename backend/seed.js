@@ -113,6 +113,26 @@ const products = [
     keywords: ['wireless headphones', 'bluetooth earphones', 'noise cancelling headphones'],
     brand: 'SoundMax',
     specifications: { Battery: '40 hours', Driver: '40mm', Bluetooth: '5.3', Weight: '250g' },
+    variants: [
+      {
+        sku: 'ELEC-HP-001-BLK',
+        attributes: { Color: 'Black' },
+        price: toINR(149.99),
+        compareAtPrice: toINR(149.99),
+        stock: 30,
+        images: [{ url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400' }],
+        status: 'active',
+      },
+      {
+        sku: 'ELEC-HP-001-WHT',
+        attributes: { Color: 'White' },
+        price: toINR(149.99),
+        compareAtPrice: toINR(149.99),
+        stock: 20,
+        images: [{ url: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400' }],
+        status: 'active',
+      }
+    ]
   },
   {
     name: 'Smart Watch Ultra',
@@ -256,6 +276,35 @@ const products = [
     keywords: ['cotton t-shirt', 'casual wear', 'organic clothing'],
     brand: 'EcoWear',
     specifications: { Material: '100% Organic Cotton', Fit: 'Relaxed', Sizes: 'S-3XL', Care: 'Machine Wash' },
+    variants: [
+      {
+        sku: 'CLTH-TS-001-BLK-M',
+        attributes: { Color: 'Black', Size: 'M' },
+        price: toINR(34.99),
+        compareAtPrice: toINR(34.99),
+        stock: 50,
+        images: [{ url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400' }],
+        status: 'active',
+      },
+      {
+        sku: 'CLTH-TS-001-BLU-M',
+        attributes: { Color: 'Blue', Size: 'M' },
+        price: toINR(34.99),
+        compareAtPrice: toINR(34.99),
+        stock: 45,
+        images: [{ url: 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=400' }],
+        status: 'active',
+      },
+      {
+        sku: 'CLTH-TS-001-WHT-L',
+        attributes: { Color: 'White', Size: 'L' },
+        price: toINR(34.99),
+        compareAtPrice: toINR(34.99),
+        stock: 30,
+        images: [{ url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400' }],
+        status: 'active',
+      }
+    ]
   },
   {
     name: 'Women\'s Kurta Set Ethnic Wear',

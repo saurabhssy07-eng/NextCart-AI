@@ -1,11 +1,17 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { Package } from 'lucide-react';
 import { setOrders, setLoading } from '../store/orderSlice';
 import { orderService } from '../services/api';
+import EmptyState from '../components/ui/EmptyState';
+import Badge from '../components/ui/Badge';
+import SectionHeader from '../components/ui/SectionHeader';
+import { OrderSkeleton } from '../components/ui/LoadingSkeleton';
 
 const Orders = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { orders, isLoading } = useSelector((state) => state.orders);
   const { accessToken } = useSelector((state) => state.auth);
@@ -34,36 +40,32 @@ const Orders = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'confirmed':
-        return 'bg-blue-100 text-blue-800';
-      case 'shipped':
-        return 'bg-purple-100 text-purple-800';
-      case 'delivered':
-        return 'bg-green-100 text-green-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+      case 'pending': return 'warning';
+      case 'confirmed': return 'primary';
+      case 'shipped': return 'secondary';
+      case 'delivered': return 'success';
+      case 'cancelled': return 'danger';
+      default: return 'secondary';
     }
   };
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-8">My Orders</h1>
+    <div className="space-y-6">
+      <SectionHeader title="My Orders" subtitle={`${orders.length} order${orders.length !== 1 ? 's' : ''} found`} />
 
       {isLoading ? (
-        <div className="text-center py-12">
-          <p className="text-gray-600">Loading orders...</p>
+        <div className="space-y-4">
+          <OrderSkeleton />
+          <OrderSkeleton />
         </div>
       ) : orders.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-600 text-lg mb-4">You haven't placed any orders yet</p>
-          <Link to="/" className="text-blue-600 hover:underline">
-            Continue Shopping
-          </Link>
-        </div>
+        <EmptyState
+          icon={Package}
+          title="You haven't placed any orders yet"
+          description="When you place orders, they will appear here. Track your shipments and view order details."
+          actionLabel="Start Shopping"
+          onAction={() => navigate('/products')}
+        />
       ) : (
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <table className="w-full">
@@ -89,9 +91,9 @@ const Orders = () => {
                     ₹{order.orderSummary.total.toLocaleString('en-IN')}
                   </td>
                   <td className="text-center px-6 py-4">
-                    <span className={`px-3 py-1 rounded text-sm font-medium ${getStatusColor(order.orderStatus)}`}>
+                    <Badge variant={getStatusColor(order.orderStatus)}>
                       {order.orderStatus}
-                    </span>
+                    </Badge>
                   </td>
                   <td className="text-center px-6 py-4">
                     <Link

@@ -1,0 +1,19 @@
+const SectionHeader = ({ title, subtitle, action, className = '' }) => {
+  return (
+    <div className={`flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 ${className}`}>
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{title}</h2>
+        {subtitle && (
+          <p className="mt-1 text-gray-500 dark:text-gray-400">{subtitle}</p>
+        )}
+      </div>
+      {action && (
+        <div className="shrink-0">
+          {action}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default SectionHeader;

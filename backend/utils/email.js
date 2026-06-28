@@ -40,10 +40,20 @@ class Email {
       text: text + `\n\nLink: ${this.url}`,
     };
 
-    const transporter = this.newTransport();
-    const info = await transporter.sendMail(mailOptions);
-    
-    console.log(`✉️ Email sent: ${nodemailer.getTestMessageUrl(info)}`);
+    console.log(`\n======================================================`);
+    console.log(`🔔 DEVELOPMENT MODE: Email sending bypassed/intercepted`);
+    console.log(`To: ${this.to}`);
+    console.log(`Subject: ${subject}`);
+    console.log(`Action Link: ${this.url}`);
+    console.log(`======================================================\n`);
+
+    try {
+      const transporter = this.newTransport();
+      const info = await transporter.sendMail(mailOptions);
+      console.log(`✉️ Ethereal Email sent: ${nodemailer.getTestMessageUrl(info)}`);
+    } catch (error) {
+      console.log(`⚠️ Note: Could not send via Ethereal (Auth failed), but you can use the Action Link above to proceed.`);
+    }
   }
 
   async sendWelcome() {

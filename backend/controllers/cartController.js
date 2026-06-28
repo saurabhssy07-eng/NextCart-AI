@@ -27,7 +27,7 @@ export const getCart = async (req, res) => {
 // ADD item to cart
 export const addToCart = async (req, res) => {
   try {
-    const { productId, quantity } = req.body;
+    const { productId, quantity, variantId, selectedOptions } = req.body;
 
     if (!productId || !quantity) {
       return res.status(400).json({
@@ -45,11 +45,40 @@ export const addToCart = async (req, res) => {
       });
     }
 
-    // Check stock
-    if (product.stock < quantity) {
+    let targetStock = product.stock;
+    let targetPrice = product.price;
+    let targetDiscountPrice = product.discountPrice || 0;
+
+    // Validate variant if provided
+    if (variantId) {
+      const variant = product.variants?.id(variantId);
+      if (!variant) {
+        return res.status(404).json({
+          success: false,
+          message: 'Variant not found on this product',
+        });
+      }
+      if (variant.status === 'draft') {
+        return res.status(400).json({
+          success: false,
+          message: 'This variant is not currently available',
+        });
+      }
+      targetStock = variant.stock;
+      targetPrice = variant.compareAtPrice || variant.price;
+      targetDiscountPrice = variant.price;
+    } else if (product.variants && product.variants.length > 0) {
       return res.status(400).json({
         success: false,
-        message: `Only ${product.stock} items available`,
+        message: 'Please select a variant for this product',
+      });
+    }
+
+    // Check stock
+    if (targetStock < quantity) {
+      return res.status(400).json({
+        success: false,
+        message: `Only ${targetStock} items available`,
       });
     }
 
@@ -59,8 +88,11 @@ export const addToCart = async (req, res) => {
       cart = new Cart({ user: req.user.id, items: [] });
     }
 
-    // Check if product already in cart
-    const existingItem = cart.items.find((item) => item.product.toString() === productId);
+    // Check if exact product + variant already in cart
+    const existingItem = cart.items.find((item) => 
+      item.product.toString() === productId && 
+      (item.variantId ? item.variantId.toString() === variantId : !variantId)
+    );
 
     // Check quantity limits
     const maxOrderQty = product.maxOrderQuantity || 5;
@@ -74,6 +106,7 @@ export const addToCart = async (req, res) => {
           message: `Maximum ${maxOrderQty} items allowed per order for this product`,
         });
       }
+      existingItem.quantity += quantity;
     } else {
       if (quantity > maxOrderQty) {
         return res.status(400).json({
@@ -81,16 +114,13 @@ export const addToCart = async (req, res) => {
           message: `Maximum ${maxOrderQty} items allowed per order for this product`,
         });
       }
-    }
-
-    if (existingItem) {
-      existingItem.quantity += quantity;
-    } else {
       cart.items.push({
         product: productId,
+        variantId: variantId || undefined,
+        selectedOptions: selectedOptions || undefined,
         quantity,
-        price: product.price,
-        discountPrice: product.discountPrice || 0,
+        price: targetPrice,
+        discountPrice: targetDiscountPrice,
       });
     }
 
@@ -115,7 +145,7 @@ export const addToCart = async (req, res) => {
 // UPDATE cart item quantity
 export const updateCartItem = async (req, res) => {
   try {
-    const { productId, quantity } = req.body;
+    const { productId, variantId, quantity } = req.body;
 
     if (!productId || !quantity) {
       return res.status(400).json({
@@ -140,10 +170,19 @@ export const updateCartItem = async (req, res) => {
       });
     }
 
-    if (product.stock < quantity) {
+    let targetStock = product.stock;
+    if (variantId) {
+      const variant = product.variants?.id(variantId);
+      if (!variant) {
+        return res.status(404).json({ success: false, message: 'Variant not found' });
+      }
+      targetStock = variant.stock;
+    }
+
+    if (targetStock < quantity) {
       return res.status(400).json({
         success: false,
-        message: `Only ${product.stock} items available`,
+        message: `Only ${targetStock} items available`,
       });
     }
 
@@ -155,7 +194,11 @@ export const updateCartItem = async (req, res) => {
       });
     }
 
-    const cartItem = cart.items.find((item) => item.product.toString() === productId);
+    const cartItem = cart.items.find((item) => 
+      item.product.toString() === productId && 
+      (item.variantId ? item.variantId.toString() === variantId : !variantId)
+    );
+
     if (!cartItem) {
       return res.status(404).json({
         success: false,
@@ -185,7 +228,10 @@ export const updateCartItem = async (req, res) => {
 // REMOVE item from cart
 export const removeFromCart = async (req, res) => {
   try {
+    // To support variants, we accept variantId in the query string or body, but since it's a DELETE request usually it's in params.
+    // We will support a new generic delete that takes an itemId (the cart subdoc ID), but for backward compatibility:
     const { productId } = req.params;
+    const { variantId } = req.query; // If frontend passes ?variantId=...
 
     if (!productId) {
       return res.status(400).json({
@@ -202,7 +248,19 @@ export const removeFromCart = async (req, res) => {
       });
     }
 
-    cart.items = cart.items.filter((item) => item.product.toString() !== productId);
+    cart.items = cart.items.filter((item) => {
+      const isProductMatch = item.product.toString() === productId;
+      if (!isProductMatch) return true; // Keep it
+      
+      // If it's a product match, check if variant matches what we want to delete
+      if (variantId) {
+        return item.variantId?.toString() !== variantId; // Remove if variant matches
+      } else {
+        // If no variantId provided to delete, remove all instances of this product (legacy behavior)
+        return false;
+      }
+    });
+
     await cart.save();
     await cart.populate('items.product');
 

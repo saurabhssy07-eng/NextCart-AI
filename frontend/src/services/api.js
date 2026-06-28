@@ -192,22 +192,23 @@ export const cartService = {
     });
   },
 
-  addToCart: async (productId, quantity) => {
+  addToCart: async (productId, quantity, variantId = null, selectedOptions = null) => {
     return customFetch(`${API_BASE_URL}/cart/add`, {
       method: 'POST',
-      body: JSON.stringify({ productId, quantity }),
+      body: JSON.stringify({ productId, quantity, variantId, selectedOptions }),
     });
   },
 
-  updateCartItem: async (productId, quantity) => {
+  updateCartItem: async (productId, quantity, variantId = null) => {
     return customFetch(`${API_BASE_URL}/cart/update`, {
       method: 'PUT',
-      body: JSON.stringify({ productId, quantity }),
+      body: JSON.stringify({ productId, quantity, variantId }),
     });
   },
 
-  removeFromCart: async (productId) => {
-    return customFetch(`${API_BASE_URL}/cart/remove/${productId}`, {
+  removeFromCart: async (productId, variantId = null) => {
+    const query = variantId ? `?variantId=${variantId}` : '';
+    return customFetch(`${API_BASE_URL}/cart/remove/${productId}${query}`, {
       method: 'DELETE',
     });
   },
@@ -269,10 +270,138 @@ export const orderService = {
   },
 };
 
+// ============= REVIEW SERVICES =============
+export const reviewService = {
+  // Get reviews for a product with pagination, sorting, and filtering
+  getProductReviews: async (productId, params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return customFetch(`${API_BASE_URL}/reviews/${productId}?${queryString}`, {
+      method: 'GET',
+    });
+  },
+
+  // Create a new review (handles FormData for images)
+  createReview: async (productId, formData) => {
+    const response = await fetch(`${API_BASE_URL}/reviews/${productId}`, {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      if (data.errors && data.errors.length > 0) {
+        data.message = data.errors[0].message;
+      }
+      throw data;
+    }
+    return data;
+  },
+
+  // Update a review
+  updateReview: async (reviewId, formData) => {
+    const response = await fetch(`${API_BASE_URL}/reviews/${reviewId}`, {
+      method: 'PUT',
+      body: formData,
+      credentials: 'include',
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      if (data.errors && data.errors.length > 0) {
+        data.message = data.errors[0].message;
+      }
+      throw data;
+    }
+    return data;
+  },
+
+  // Delete a review
+  deleteReview: async (reviewId) => {
+    return customFetch(`${API_BASE_URL}/reviews/${reviewId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Vote on a review (helpful, not_helpful, spam)
+  voteReview: async (reviewId, value) => {
+    return customFetch(`${API_BASE_URL}/reviews/${reviewId}/vote`, {
+      method: 'POST',
+      body: JSON.stringify({ value }),
+    });
+  }
+};
+
+// ============= USER SERVICES =============
+export const userService = {
+  updateProfile: async (profileData) => {
+    return customFetch(`${API_BASE_URL}/users/profile`, {
+      method: 'PUT',
+      body: JSON.stringify(profileData),
+    });
+  },
+  
+  uploadAvatar: async (formData) => {
+    const response = await fetch(`${API_BASE_URL}/users/profile/avatar`, {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+    });
+    const data = await response.json();
+    return data;
+  },
+
+  deleteAvatar: async () => {
+    return customFetch(`${API_BASE_URL}/users/profile/avatar`, {
+      method: 'DELETE',
+    });
+  },
+
+  addAddress: async (addressData) => {
+    return customFetch(`${API_BASE_URL}/users/addresses`, {
+      method: 'POST',
+      body: JSON.stringify(addressData),
+    });
+  },
+
+  updateAddress: async (id, addressData) => {
+    return customFetch(`${API_BASE_URL}/users/addresses/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(addressData),
+    });
+  },
+
+  deleteAddress: async (id) => {
+    return customFetch(`${API_BASE_URL}/users/addresses/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  setDefaultAddress: async (id, type) => {
+    return customFetch(`${API_BASE_URL}/users/addresses/${id}/default`, {
+      method: 'PUT',
+      body: JSON.stringify({ type }), // 'billing' or 'shipping'
+    });
+  },
+
+  toggleWishlist: async (productId) => {
+    return customFetch(`${API_BASE_URL}/users/wishlist`, {
+      method: 'POST',
+      body: JSON.stringify({ productId }),
+    });
+  },
+
+  getWishlist: async () => {
+    return customFetch(`${API_BASE_URL}/users/wishlist`, {
+      method: 'GET',
+    });
+  },
+};
+
 export default {
   authService,
   productService,
   categoryService,
   cartService,
   orderService,
+  userService,
+  reviewService,
 };

@@ -41,9 +41,29 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
-    avatar: {
+    dateOfBirth: {
+      type: Date,
+      default: null,
+    },
+    gender: {
       type: String,
-      default: 'https://via.placeholder.com/150',
+      enum: ['Male', 'Female', 'Other', 'Prefer not to say'],
+      default: 'Prefer not to say',
+    },
+    bio: {
+      type: String,
+      maxlength: [300, 'Bio cannot exceed 300 characters'],
+      default: '',
+    },
+    avatar: {
+      publicId: {
+        type: String,
+        default: null,
+      },
+      url: {
+        type: String,
+        default: 'https://via.placeholder.com/150',
+      }
     },
     role: {
       type: String,
@@ -84,29 +104,60 @@ const userSchema = new mongoose.Schema(
         lastActive: { type: Date, default: Date.now },
       }
     ],
-    address: {
-      street: String,
-      locality: String,
-      city: String,
-      state: String,
-      zipCode: String,
-      country: { type: String, default: 'India' },
-      landmark: String,
-    },
+    addresses: [
+      {
+        street: { type: String, required: true },
+        locality: { type: String },
+        city: { type: String, required: true },
+        state: { type: String, required: true },
+        zipCode: { type: String, required: true },
+        country: { type: String, default: 'India' },
+        landmark: String,
+        label: { type: String, enum: ['Home', 'Office', 'Other'], default: 'Home' },
+        isDefaultBilling: { type: Boolean, default: false },
+        isDefaultShipping: { type: Boolean, default: false },
+      }
+    ],
+    wishlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+      }
+    ],
     detectedLocation: {
       city: String,
       state: String,
       zipCode: String,
     },
     preferences: {
-      newsletter: {
-        type: Boolean,
-        default: true,
+      theme: {
+        type: String,
+        enum: ['Light', 'Dark', 'System'],
+        default: 'System',
       },
-      notifications: {
-        type: Boolean,
-        default: true,
+      language: {
+        type: String,
+        enum: ['English', 'Hindi'],
+        default: 'English',
       },
+      currency: {
+        type: String,
+        enum: ['INR', 'USD'],
+        default: 'INR',
+      },
+    },
+    notifications: {
+      marketing: { type: Boolean, default: true },
+      orderUpdates: { type: Boolean, default: true },
+      securityAlerts: { type: Boolean, default: true },
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    deletedAt: {
+      type: Date,
+      default: null,
     },
   },
   { timestamps: true }

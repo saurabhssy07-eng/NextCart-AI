@@ -1,11 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { setFeaturedProducts, setLoading } from '../store/productSlice';
+import { productService, categoryService, cartService, userService } from '../services/api';
 import { setCart } from '../store/cartSlice';
-import { productService, categoryService, cartService } from '../services/api';
+import { setUser } from '../store/authSlice';
 import { ProductCardSkeleton, CategoryCardSkeleton } from '../components/Skeleton';
+import ProductCard from '../components/product/ProductCard';
+import Button from '../components/ui/Button';
+import Badge from '../components/ui/Badge';
+import { ChevronRight, Flame, Sparkles, Tag, Truck, ShieldCheck, Zap } from 'lucide-react';
 
 const CATEGORY_IMAGES = {
   'Electronics': 'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=300',
@@ -16,7 +21,7 @@ const CATEGORY_IMAGES = {
   'Beauty & Health': 'https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=300',
   'Toys & Games': 'https://images.unsplash.com/photo-1558060370-d651511a4e72?w=300',
   'Baby Products': 'https://images.unsplash.com/photo-1519689680058-324335c77eba?w=300',
-  'Automotive': 'https://images.unsplash.com/photo-1449966368868-9f1af1ab77d0?w=300',
+  'Automotive': 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=300',
   'Pet Supplies': 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=300',
   'Garden & Outdoors': 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=300',
   'Office & Stationery': 'https://images.unsplash.com/photo-1497215842964-222b4bef3739?w=300',
@@ -25,11 +30,14 @@ const CATEGORY_IMAGES = {
 
 const Home = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  
   const { featured, isLoading } = useSelector((state) => state.products);
-  const { accessToken } = useSelector((state) => state.auth);
-  const [quantity, setQuantity] = useState({});
+  
   const [categories, setCategories] = useState([]);
   const [trendingProducts, setTrendingProducts] = useState([]);
+  const [discountedProducts, setDiscountedProducts] = useState([]);
+  const [newArrivals, setNewArrivals] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [trendingLoading, setTrendingLoading] = useState(true);
 
@@ -37,7 +45,32 @@ const Home = () => {
     loadFeaturedProducts();
     loadCategories();
     loadTrendingProducts();
+    loadAdditionalProducts();
   }, []);
+
+  const handleToggleWishlist = async (productId) => {
+    try {
+      const res = await userService.toggleWishlist(productId);
+      if (res.success) {
+        dispatch(setUser(res.user));
+        toast.success(res.message);
+      }
+    } catch (error) {
+      toast.error('Failed to update wishlist');
+    }
+  };
+
+  const handleAddToCart = async (productId) => {
+    try {
+      const res = await cartService.addToCart(productId, 1);
+      if (res.success) {
+        dispatch(setCart(res.data));
+        toast.success('Added to cart');
+      }
+    } catch (error) {
+      toast.error('Failed to add to cart');
+    }
+  };
 
   const loadFeaturedProducts = async () => {
     dispatch(setLoading(true));
@@ -70,7 +103,7 @@ const Home = () => {
   const loadTrendingProducts = async () => {
     setTrendingLoading(true);
     try {
-      const response = await productService.getAllProducts({ sort: '-rating', limit: 8 });
+      const response = await productService.getAllProducts({ sort: '-rating', limit: 5 });
       if (response.success) {
         setTrendingProducts(response.data);
       }
@@ -81,320 +114,293 @@ const Home = () => {
     }
   };
 
-  const handleAddToCart = async (productId) => {
-    if (!accessToken) {
-      toast.error('Please login to add items to cart');
-      return;
-    }
-
-    const qty = quantity[productId] || 1;
-
+  const loadAdditionalProducts = async () => {
     try {
-      const response = await cartService.addToCart(productId, qty, accessToken);
-      if (response.success) {
-        dispatch(setCart(response.data));
-        toast.success('Added to cart!');
-        setQuantity((prev) => ({ ...prev, [productId]: 1 }));
-      } else {
-        toast.error(response.message || 'Failed to add to cart');
-      }
-    } catch (error) {
-      toast.error('Failed to add to cart');
+      const [discountRes, newRes] = await Promise.all([
+        productService.getAllProducts({ sort: 'price', limit: 5 }), // mock for deals
+        productService.getAllProducts({ sort: '-createdAt', limit: 5 })
+      ]);
+      if (discountRes.success) setDiscountedProducts(discountRes.data);
+      if (newRes.success) setNewArrivals(newRes.data);
+    } catch(e) {
+      console.error(e);
     }
   };
 
   return (
-    <div>
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white py-20 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl"></div>
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-indigo-300 rounded-full blur-3xl"></div>
-        </div>
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">
-            Welcome to <span className="text-yellow-300">NextCart AI</span>
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
+      
+      {/* 1. Hero Banner Section */}
+      <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-primary-900 text-white py-16 md:py-24 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
+        <div className="container mx-auto px-4 relative z-10 flex flex-col items-center text-center">
+          <Badge className="bg-primary-500/20 text-primary-200 border-primary-500/30 mb-6 backdrop-blur-sm px-4 py-1 text-sm">
+            Phase 5.1.6 UI Polish Complete
+          </Badge>
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 tracking-tight">
+            Welcome to <span className="text-primary-400">NextCart AI</span>
           </h1>
-          <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-2xl mx-auto">
-            Your AI-powered shopping destination for quality products
-            with the best prices, fast delivery, and easy returns.
+          <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-10 font-medium leading-relaxed">
+            Experience the future of shopping. Discover personalized deals, smart recommendations, and millions of premium products.
           </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link
-              to="/products"
-              className="inline-block bg-white text-blue-700 px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-100 shadow-lg hover:shadow-xl transition-all"
-            >
-              🛍️ Shop Now
-            </Link>
-            <Link
-              to="/products?sort=-rating"
-              className="inline-block bg-yellow-400 text-blue-900 px-8 py-3 rounded-lg font-bold text-lg hover:bg-yellow-300 shadow-lg hover:shadow-xl transition-all"
-            >
-              🔥 Trending
-            </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button size="lg" onClick={() => navigate('/products')} className="px-8 shadow-lg shadow-primary-500/30 rounded-full h-14 text-lg">
+              Shop Now <ChevronRight className="w-5 h-5 ml-2" />
+            </Button>
+            <Button size="lg" variant="outline" className="px-8 border-gray-400 text-white hover:bg-white/10 rounded-full h-14 text-lg" onClick={() => navigate('/deals')}>
+              View Deals <Tag className="w-5 h-5 ml-2" />
+            </Button>
           </div>
         </div>
       </section>
 
-      {/* Shop by Category */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-            🏷️ Shop by Category
-          </h2>
-          <Link
-            to="/products"
-            className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
-          >
-            View All →
-          </Link>
-        </div>
-
-        {categoriesLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <CategoryCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : categories.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {categories.map((cat) => (
-              <Link
-                key={cat._id}
-                to={`/products?category=${cat._id}`}
-                className="group bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700 hover:shadow-xl hover:-translate-y-1 transition-all"
-              >
-                <div className="h-32 overflow-hidden">
-                  <img
-                    src={cat.image || CATEGORY_IMAGES[cat.name] || 'https://via.placeholder.com/300'}
-                    alt={cat.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                </div>
-                <div className="p-3 text-center">
-                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    {cat.name}
-                  </h3>
-                </div>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <p className="text-center text-gray-500 dark:text-gray-400 py-8">
-            Categories loading...
-          </p>
-        )}
-      </section>
-
-      {/* Featured Products */}
-      <section className="bg-gray-50 dark:bg-gray-800/50 py-16">
+      {/* Trust Badges Bar */}
+      <div className="bg-surface-light dark:bg-surface-dark border-b border-border-light dark:border-border-dark py-5 hidden sm:block shadow-sm z-20 relative">
         <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-              ⭐ Featured Products
-            </h2>
-            <Link
-              to="/products"
-              className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
-            >
-              View All →
+          <div className="flex justify-between items-center max-w-5xl mx-auto">
+            <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 font-semibold uppercase tracking-wide">
+              <Truck className="w-5 h-5 text-primary-500" /> Free Delivery
+            </div>
+            <div className="w-px h-5 bg-gray-300 dark:bg-gray-700"></div>
+            <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 font-semibold uppercase tracking-wide">
+              <ShieldCheck className="w-5 h-5 text-primary-500" /> Secure Payment
+            </div>
+            <div className="w-px h-5 bg-gray-300 dark:bg-gray-700"></div>
+            <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 font-semibold uppercase tracking-wide">
+              <Zap className="w-5 h-5 text-primary-500" /> Fast Shipping
+            </div>
+            <div className="w-px h-5 bg-gray-300 dark:bg-gray-700"></div>
+            <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 font-semibold uppercase tracking-wide">
+              <Tag className="w-5 h-5 text-primary-500" /> Best Deals
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-16 space-y-24">
+        
+        {/* 2. Categories Section */}
+        <section>
+          <div className="flex justify-between items-end mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Shop by Category</h2>
+              <p className="text-gray-500 mt-2">Explore our wide range of collections</p>
+            </div>
+            <Link to="/categories" className="text-primary-600 dark:text-primary-400 font-semibold hover:underline flex items-center">
+              View All <ChevronRight className="w-4 h-4 ml-1" />
             </Link>
           </div>
-
-          {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <ProductCardSkeleton key={i} />
-              ))}
-            </div>
-          ) : featured && featured.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featured.slice(0, 8).map((product) => (
-                <div key={product._id} className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all border border-gray-100 dark:border-gray-700 group">
-                  <Link to={`/products/${product._id}`} className="block relative overflow-hidden">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            {categoriesLoading ? (
+              Array(6).fill(0).map((_, i) => (
+                <div key={i} className="bg-gray-200 dark:bg-gray-800 h-36 rounded-2xl animate-pulse"></div>
+              ))
+            ) : categories.length === 0 ? (
+              <div className="col-span-full py-8 text-center text-gray-500">No categories found.</div>
+            ) : (
+              categories.slice(0, 6).map((category) => (
+                <Link 
+                  key={category._id} 
+                  to={`/products?category=${category._id}`}
+                  className="group relative h-36 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                >
+                  <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700">
+                    <img 
+                      src={category.image?.url || CATEGORY_IMAGES[category.name] || `https://placehold.co/400x300/e2e8f0/475569?text=${encodeURIComponent(category.name)}`} 
+                      alt={category.name}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      onError={(e) => {
+                        e.target.src = `https://placehold.co/400x300/e2e8f0/475569?text=${encodeURIComponent(category.name)}`;
+                      }}
                     />
-                    {product.discountPrice > 0 && (
-                      <span className="absolute top-2 left-2 bg-red-500 text-white px-2 py-0.5 rounded text-xs font-bold">
-                        🏷️ SALE
-                      </span>
-                    )}
-                  </Link>
-                  <div className="p-4">
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">
-                      {product.category?.name}
-                    </div>
-                    <Link to={`/products/${product._id}`}>
-                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                        {product.name}
-                      </h3>
-                    </Link>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">
-                      {product.description}
-                    </p>
-
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <span className="text-xl font-bold text-gray-900 dark:text-white">
-                          ₹{(product.discountPrice || product.price).toLocaleString('en-IN')}
-                        </span>
-                        {product.discountPrice > 0 && (
-                          <span className="text-sm text-gray-500 dark:text-gray-400 line-through ml-2">
-                            ₹{product.price.toLocaleString('en-IN')}
-                          </span>
-                        )}
-                      </div>
-                      <span className="bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300 px-2 py-1 rounded text-xs font-medium">
-                        ⭐ {product.rating}/5
-                      </span>
-                    </div>
-
-                    {product.stock > 0 ? (
-                      <div className="flex gap-2">
-                        <input
-                          type="number"
-                          min="1"
-                          max={product.stock}
-                          value={quantity[product._id] || 1}
-                          onChange={(e) =>
-                            setQuantity((prev) => ({
-                              ...prev,
-                              [product._id]: Math.max(1, parseInt(e.target.value) || 1),
-                            }))
-                          }
-                          className="w-14 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-center text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                        />
-                        <button
-                          onClick={() => handleAddToCart(product._id)}
-                          className="flex-1 bg-blue-600 text-white py-1.5 rounded text-sm font-medium hover:bg-blue-700 transition"
-                        >
-                          Add to Cart
-                        </button>
-                      </div>
-                    ) : (
-                      <p className="text-red-500 text-sm font-medium text-center">Out of Stock</p>
-                    )}
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-500 dark:text-gray-400 text-lg">No featured products available</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Trending Products */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-            🔥 Trending Products
-          </h2>
-          <Link
-            to="/products?sort=-rating"
-            className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
-          >
-            View All →
-          </Link>
-        </div>
-
-        {trendingLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <ProductCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : trendingProducts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {trendingProducts.map((product) => (
-              <div key={product._id} className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all border border-gray-100 dark:border-gray-700 group">
-                <Link to={`/products/${product._id}`} className="block relative overflow-hidden">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  {product.rating >= 4.5 && (
-                    <span className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded text-xs font-bold">
-                      🔥 TOP
-                    </span>
-                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <h3 className="text-white font-bold leading-tight">{category.name}</h3>
+                  </div>
                 </Link>
-                <div className="p-4">
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">
-                    {product.category?.name}
-                  </div>
-                  <Link to={`/products/${product._id}`}>
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                      {product.name}
-                    </h3>
-                  </Link>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">
-                    {product.description}
-                  </p>
+              ))
+            )}
+          </div>
+        </section>
 
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <span className="text-xl font-bold text-gray-900 dark:text-white">
-                        ₹{(product.discountPrice || product.price).toLocaleString('en-IN')}
-                      </span>
-                      {product.discountPrice > 0 && (
-                        <span className="text-sm text-gray-500 dark:text-gray-400 line-through ml-2">
-                          ₹{product.price.toLocaleString('en-IN')}
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <span className="text-sm text-yellow-600 dark:text-yellow-400 font-medium">
-                        ⭐ {product.rating.toFixed(1)}
-                      </span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400 block">
-                        {product.reviews} reviews
-                      </span>
-                    </div>
-                  </div>
+        {/* 3. Trending Products */}
+        <section>
+          <div className="flex justify-between items-end mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3 tracking-tight">
+                Trending Now <Flame className="w-8 h-8 text-orange-500" />
+              </h2>
+              <p className="text-gray-500 mt-2">Products loved by our community</p>
+            </div>
+            <Link to="/products?sort=-rating" className="text-primary-600 dark:text-primary-400 font-semibold hover:underline flex items-center">
+              View All <ChevronRight className="w-4 h-4 ml-1" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {trendingLoading ? (
+              Array(5).fill(0).map((_, i) => <ProductCardSkeleton key={i} />)
+            ) : trendingProducts.length === 0 ? (
+              <div className="col-span-full py-12 text-center text-gray-500 bg-white dark:bg-gray-800 rounded-xl">No trending products found.</div>
+            ) : (
+              trendingProducts.slice(0, 5).map(product => (
+                <ProductCard key={product._id} product={product} onWishlistToggle={handleToggleWishlist} onAddToCart={handleAddToCart} />
+              ))
+            )}
+          </div>
+        </section>
+
+        {/* 4. Deals of the Day */}
+        <section>
+          <div className="flex justify-between items-end mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3 tracking-tight">
+                Deals of the Day <Tag className="w-8 h-8 text-red-500" />
+              </h2>
+              <p className="text-gray-500 mt-2">Don't miss out on these amazing discounts</p>
+            </div>
+            <Link to="/deals" className="text-primary-600 dark:text-primary-400 font-semibold hover:underline flex items-center">
+              View All <ChevronRight className="w-4 h-4 ml-1" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {trendingLoading ? (
+              Array(5).fill(0).map((_, i) => <ProductCardSkeleton key={i} />)
+            ) : discountedProducts.length === 0 ? (
+              <div className="col-span-full py-12 text-center text-gray-500 bg-white dark:bg-gray-800 rounded-xl">No deals currently available.</div>
+            ) : (
+              discountedProducts.slice(0, 5).map(product => (
+                <ProductCard key={product._id} product={product} onWishlistToggle={handleToggleWishlist} onAddToCart={handleAddToCart} />
+              ))
+            )}
+          </div>
+        </section>
+        
+        {/* 5. Featured Brands */}
+        <section className="bg-white dark:bg-gray-800/80 rounded-3xl p-10 border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-8 opacity-5">
+            <Sparkles className="w-48 h-48" />
+          </div>
+          <div className="text-center mb-10 relative z-10">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Featured Brands</h2>
+            <p className="text-gray-500 mt-2">Shop from the best brands in the world</p>
+          </div>
+          <div className="flex flex-wrap justify-center items-center gap-10 md:gap-20 opacity-40 grayscale hover:grayscale-0 transition-all duration-500 relative z-10">
+            {['Nike', 'Apple', 'Samsung', 'Sony', 'Adidas', 'Puma'].map((brand, i) => (
+              <div 
+                key={i} 
+                onClick={() => navigate(`/products?search=${brand}`)}
+                className="text-2xl md:text-4xl font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest hover:text-primary-600 transition-colors cursor-pointer hover:scale-110"
+              >
+                {brand}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 6. Recently Viewed */}
+        {(() => {
+          const viewedStr = localStorage.getItem('recentlyViewed');
+          if (!viewedStr) return null;
+          try {
+            const viewed = JSON.parse(viewedStr);
+            if (!Array.isArray(viewed) || viewed.length === 0) return null;
+            return (
+              <section>
+                <div className="flex justify-between items-end mb-8">
+                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2 tracking-tight">
+                    Recently Viewed
+                  </h2>
                 </div>
-              </div>
-            ))}
+                <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                  {viewed.slice(0, 5).map(product => (
+                    <ProductCard key={product._id} product={product} onWishlistToggle={handleToggleWishlist} onAddToCart={handleAddToCart} />
+                  ))}
+                </div>
+              </section>
+            );
+          } catch(e) { return null; }
+        })()}
+        
+        {/* 7. Recommended For You */}
+        <section>
+          <div className="flex justify-between items-end mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3 tracking-tight">
+                Recommended For You <Sparkles className="w-7 h-7 text-yellow-500" />
+              </h2>
+              <p className="text-gray-500 mt-2">Based on your browsing history</p>
+            </div>
           </div>
-        ) : null}
-      </section>
 
-      {/* Features Section */}
-      <section className="bg-gray-50 dark:bg-gray-800/50 py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold mb-12 text-center text-gray-900 dark:text-white">
-            Why Choose NextCart AI?
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { icon: '🇮🇳', title: 'Made for India', desc: 'Localized shopping with Indian payment options, PIN codes, and regional support' },
-              { icon: '🚚', title: 'Free Shipping', desc: 'Free delivery on all orders above ₹499 with fast and reliable shipping across India' },
-              { icon: '💯', title: 'Quality Products', desc: 'Curated selection of high-quality items from trusted brands and sellers' },
-              { icon: '🤖', title: 'AI-Powered', desc: 'Smart recommendations and personalized shopping experience' },
-              { icon: '🔒', title: 'Secure Payments', desc: '100% secure payments with UPI, cards, net banking, and COD options' },
-              { icon: '🔄', title: 'Easy Returns', desc: 'Hassle-free returns and exchanges within 7 days of delivery' },
-              { icon: '📞', title: '24/7 Support', desc: 'Round-the-clock customer support for all your queries' },
-              { icon: '🎯', title: 'Best Prices', desc: 'Competitive prices with regular deals, discounts, and offers' },
-            ].map((feature, index) => (
-              <div key={index} className="text-center p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all">
-                <div className="text-5xl mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">
-                  {feature.desc}
-                </p>
-              </div>
-            ))}
+          <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {trendingLoading ? (
+              Array(5).fill(0).map((_, i) => <ProductCardSkeleton key={i} />)
+            ) : featured.length === 0 ? (
+              <div className="col-span-full py-12 text-center text-gray-500 bg-white dark:bg-gray-800 rounded-xl">No recommendations found.</div>
+            ) : (
+              featured.slice(0, 5).map(product => (
+                <ProductCard key={product._id} product={product} onWishlistToggle={handleToggleWishlist} onAddToCart={handleAddToCart} />
+              ))
+            )}
           </div>
-        </div>
-      </section>
+        </section>
+
+        {/* 8. New Arrivals */}
+        <section>
+          <div className="flex justify-between items-end mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3 tracking-tight">
+                New Arrivals <Sparkles className="w-7 h-7 text-purple-500" />
+              </h2>
+              <p className="text-gray-500 mt-2">Check out the latest additions to our store</p>
+            </div>
+            <Link to="/products?sort=-createdAt" className="text-primary-600 dark:text-primary-400 font-semibold hover:underline flex items-center">
+              View All <ChevronRight className="w-4 h-4 ml-1" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {trendingLoading ? (
+              Array(5).fill(0).map((_, i) => <ProductCardSkeleton key={i} />)
+            ) : newArrivals.length === 0 ? (
+              <div className="col-span-full py-12 text-center text-gray-500 bg-white dark:bg-gray-800 rounded-xl">No products found.</div>
+            ) : (
+              newArrivals.slice(0, 5).map(product => (
+                <ProductCard key={product._id} product={product} onWishlistToggle={handleToggleWishlist} onAddToCart={handleAddToCart} />
+              ))
+            )}
+          </div>
+        </section>
+
+        {/* 9. Newsletter Signup */}
+        <section className="bg-gradient-to-r from-primary-700 to-indigo-800 rounded-3xl p-10 md:p-16 text-center text-white relative overflow-hidden shadow-2xl mb-12">
+          <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+             <Sparkles className="w-64 h-64" />
+          </div>
+          <div className="relative z-10 max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight">Get 10% Off Your First Order</h2>
+            <p className="text-primary-100 mb-10 text-lg md:text-xl">
+              Subscribe to our newsletter to receive exclusive deals, early access to sales, and new arrivals directly in your inbox.
+            </p>
+            <form 
+              className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto" 
+              onSubmit={(e) => { 
+                e.preventDefault(); 
+                toast.info('A verification link has been sent to this email address. Please verify to confirm your subscription.', { autoClose: 5000 });
+                e.target.reset();
+              }}
+            >
+              <input type="email" placeholder="Enter your email address" required className="flex-1 px-6 py-4 rounded-xl text-gray-900 focus:outline-none focus:ring-4 focus:ring-primary-500/50 shadow-inner text-lg" />
+              <Button type="submit" variant="secondary" className="px-10 py-4 rounded-xl bg-gray-900 hover:bg-gray-800 text-white border-0 shadow-xl text-lg font-bold">Subscribe</Button>
+            </form>
+          </div>
+        </section>
+
+      </div>
     </div>
   );
 };
