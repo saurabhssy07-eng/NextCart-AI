@@ -24,11 +24,21 @@ export const createOrder = async (req, res) => {
 
     // Verify stock for all items
     for (const item of cart.items) {
-      if (item.product.stock < item.quantity) {
-        return res.status(400).json({
-          success: false,
-          message: `${item.product.name} has insufficient stock`,
-        });
+      if (item.variantId) {
+        const variant = item.product.variants.id(item.variantId);
+        if (!variant || variant.stock < item.quantity) {
+          return res.status(400).json({
+            success: false,
+            message: `Insufficient stock for variant of ${item.product.name}`,
+          });
+        }
+      } else {
+        if (item.product.stock < item.quantity) {
+          return res.status(400).json({
+            success: false,
+            message: `${item.product.name} has insufficient stock`,
+          });
+        }
       }
     }
 
@@ -37,6 +47,8 @@ export const createOrder = async (req, res) => {
       user: req.user.id,
       items: cart.items.map((item) => ({
         product: item.product._id,
+        variantId: item.variantId,
+        selectedOptions: item.selectedOptions,
         quantity: item.quantity,
         price: item.price,
       })),
@@ -56,11 +68,18 @@ export const createOrder = async (req, res) => {
 
     await order.save();
 
-    // Update product stock
+    // Update product/variant stock
     for (const item of cart.items) {
-      await Product.findByIdAndUpdate(item.product._id, {
-        $inc: { stock: -item.quantity },
-      });
+      if (item.variantId) {
+        await Product.findOneAndUpdate(
+          { _id: item.product._id, 'variants._id': item.variantId },
+          { $inc: { 'variants.$.stock': -item.quantity } }
+        );
+      } else {
+        await Product.findByIdAndUpdate(item.product._id, {
+          $inc: { stock: -item.quantity },
+        });
+      }
     }
 
     // Clear cart
@@ -213,7 +232,7 @@ export const cancelOrder = async (req, res) => {
     }
 
     // Can only cancel pending or confirmed orders
-    if (!['pending', 'confirmed'].includes(order.orderStatus)) {
+    if (!['Pending', 'Confirmed'].includes(order.orderStatus)) {
       return res.status(400).json({
         success: false,
         message: 'Cannot cancel this order',
@@ -222,12 +241,19 @@ export const cancelOrder = async (req, res) => {
 
     // Restore product stock
     for (const item of order.items) {
-      await Product.findByIdAndUpdate(item.product, {
-        $inc: { stock: item.quantity },
-      });
+      if (item.variantId) {
+        await Product.findOneAndUpdate(
+          { _id: item.product, 'variants._id': item.variantId },
+          { $inc: { 'variants.$.stock': item.quantity } }
+        );
+      } else {
+        await Product.findByIdAndUpdate(item.product, {
+          $inc: { stock: item.quantity },
+        });
+      }
     }
 
-    order.orderStatus = 'cancelled';
+    order.orderStatus = 'Cancelled';
     await order.save();
 
     res.status(200).json({

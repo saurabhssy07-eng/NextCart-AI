@@ -5,6 +5,8 @@ import { toast } from 'react-toastify';
 import { clearCart } from '../store/cartSlice';
 import { addOrder } from '../store/orderSlice';
 import { orderService, cartService } from '../services/api';
+import { getEstimatedDelivery } from '../utils/dateUtils';
+import { Truck } from 'lucide-react';
 
 // Indian States list
 const INDIAN_STATES = [
@@ -693,6 +695,17 @@ const Checkout = () => {
                   <span>Total</span>
                   <span>₹{finalPrice.toLocaleString('en-IN')}</span>
                 </div>
+              </div>
+            </div>
+
+            {/* Estimated Delivery */}
+            <div className="mt-4 bg-primary-50 dark:bg-primary-900/10 p-4 rounded-xl border border-primary-100 dark:border-primary-900/30 flex items-center gap-4">
+              <div className="bg-white dark:bg-gray-800 p-2 rounded-full shadow-sm">
+                <Truck className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-0.5">Estimated Delivery</p>
+                <p className="font-bold text-gray-900 dark:text-white">Arrives: {getEstimatedDelivery()}</p>
               </div>
             </div>
 

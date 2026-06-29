@@ -39,12 +39,16 @@ const Orders = () => {
   };
 
   const getStatusColor = (status) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case 'pending': return 'warning';
       case 'confirmed': return 'primary';
+      case 'packed': return 'primary';
       case 'shipped': return 'secondary';
+      case 'out for delivery': return 'secondary';
       case 'delivered': return 'success';
       case 'cancelled': return 'danger';
+      case 'returned': return 'warning';
+      case 'refunded': return 'success';
       default: return 'secondary';
     }
   };

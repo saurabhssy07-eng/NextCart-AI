@@ -18,6 +18,13 @@ const orderSchema = new mongoose.Schema(
           ref: 'Product',
           required: true,
         },
+        variantId: {
+          type: mongoose.Schema.Types.ObjectId,
+        },
+        selectedOptions: {
+          type: Map,
+          of: String,
+        },
         quantity: {
           type: Number,
           required: true,
@@ -82,8 +89,8 @@ const orderSchema = new mongoose.Schema(
     },
     orderStatus: {
       type: String,
-      enum: ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'returned'],
-      default: 'pending',
+      enum: ['Pending', 'Confirmed', 'Packed', 'Shipped', 'Out For Delivery', 'Delivered', 'Cancelled', 'Returned', 'Refunded'],
+      default: 'Pending',
     },
     trackingNumber: {
       type: String,

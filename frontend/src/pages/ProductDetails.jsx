@@ -13,6 +13,7 @@ import { ProductCardSkeleton } from '../components/ui/LoadingSkeleton';
 import ProductCard from '../components/product/ProductCard';
 import ReviewSection from '../components/product/ReviewSection';
 import AiReviewSummary from '../components/product/AiReviewSummary';
+import { getEstimatedDelivery } from '../utils/dateUtils';
 
 const colorMap = {
   black: '#000000',
@@ -459,6 +460,17 @@ const ProductDetails = () => {
                   )}
                 </div>
               )}
+
+              {/* Estimated Delivery */}
+              <div className="bg-primary-50 dark:bg-primary-900/10 p-4 rounded-xl border border-primary-100 dark:border-primary-900/30 mb-6 flex items-center gap-4">
+                <div className="bg-white dark:bg-gray-800 p-2 rounded-full shadow-sm">
+                  <Truck className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-0.5">Estimated Delivery</p>
+                  <p className="font-bold text-gray-900 dark:text-white">Arrives: {getEstimatedDelivery()}</p>
+                </div>
+              </div>
 
               {/* Add to Cart Actions */}
               <div className="flex flex-col sm:flex-row gap-4 mb-8">

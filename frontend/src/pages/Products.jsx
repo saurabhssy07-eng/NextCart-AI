@@ -128,9 +128,34 @@ const Products = () => {
     }
   };
 
+  const getPageHeader = () => {
+    if (isDealsPage) {
+      return { title: 'Deals of the Day', subtitle: 'Amazing discounts on top products' };
+    }
+    if (filters.sort === '-rating') {
+      return { title: 'Trending Products', subtitle: 'Highly rated by our community' };
+    }
+    if (filters.sort === '-createdAt') {
+      return { title: 'New Arrivals', subtitle: 'The latest additions to our store' };
+    }
+    if (filters.category) {
+      const cat = categories.find(c => c._id === filters.category);
+      if (cat) return { title: cat.name, subtitle: `Explore ${cat.name} products` };
+    }
+    if (filters.search) {
+      return { title: 'Search Results', subtitle: `Showing results for "${filters.search}"` };
+    }
+    return { title: 'All Products', subtitle: 'Explore our complete collection' };
+  };
+
+  const headerInfo = getPageHeader();
+
   return (
     <div className="container mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-8 text-gray-900">All Products</h1>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{headerInfo.title}</h1>
+        <p className="text-gray-500 dark:text-gray-400 mt-2">{headerInfo.subtitle}</p>
+      </div>
 
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 mb-8">
