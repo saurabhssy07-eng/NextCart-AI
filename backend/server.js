@@ -15,6 +15,26 @@ import paymentRoutes from './routes/paymentRoutes.js';
 const app = express();
 const startTime = Date.now();
 
+// Validate Environment Variables
+const requiredEnvVars = [
+  'MONGODB_URI',
+  'JWT_SECRET',
+  'RAZORPAY_KEY_ID',
+  'RAZORPAY_KEY_SECRET',
+  'CLOUDINARY_CLOUD_NAME',
+  'CLOUDINARY_API_KEY',
+  'CLOUDINARY_API_SECRET'
+];
+
+const missingEnvVars = requiredEnvVars.filter((envVar) => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+  console.error('❌ CRITICAL ERROR: Missing required environment variables:');
+  missingEnvVars.forEach((envVar) => console.error(`  - ${envVar}`));
+  console.error('Please configure them in your .env.local file. Server is shutting down.');
+  process.exit(1);
+}
+
 // Middleware
 const allowedOrigins = [config.frontendUrl, 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:3000'];
 app.use(cors({

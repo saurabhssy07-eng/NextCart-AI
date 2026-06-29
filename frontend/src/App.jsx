@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Provider, useDispatch } from 'react-redux';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense, lazy } from 'react';
+import { HelmetProvider } from 'react-helmet-async';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import store from './store';
@@ -9,7 +10,6 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { authService } from './services/api';
 import { setUser, logout } from './store/authSlice';
 
-// Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
@@ -18,26 +18,39 @@ import ProductDetails from './pages/ProductDetails';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import VerifyEmail from './pages/VerifyEmail';
-import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
-import Orders from './pages/Orders';
-import OrderDetails from './pages/OrderDetails';
-import AIShopping from './pages/AIShopping';
-import MyAccountLayout from './pages/account/MyAccountLayout';
-import Dashboard from './pages/account/Dashboard';
-import ProfileInfo from './pages/account/ProfileInfo';
-import AddressManager from './pages/account/AddressManager';
-import Wishlist from './pages/account/Wishlist';
-import OrderSuccess from './pages/OrderSuccess';
+import NotFound from './pages/NotFound';
+import ActionFeedback from './pages/ActionFeedback';
+
+// Lazy-loaded Pages
+const Cart = lazy(() => import('./pages/Cart'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const Orders = lazy(() => import('./pages/Orders'));
+const OrderDetails = lazy(() => import('./pages/OrderDetails'));
+const AIShopping = lazy(() => import('./pages/AIShopping'));
+const MyAccountLayout = lazy(() => import('./pages/account/MyAccountLayout'));
+const Dashboard = lazy(() => import('./pages/account/Dashboard'));
+const ProfileInfo = lazy(() => import('./pages/account/ProfileInfo'));
+const AddressManager = lazy(() => import('./pages/account/AddressManager'));
+const Wishlist = lazy(() => import('./pages/account/Wishlist'));
+const OrderSuccess = lazy(() => import('./pages/OrderSuccess'));
 
 // Components
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
+import NetworkStatus from './components/NetworkStatus';
+import { FullscreenLoader } from './components/ui/Loader';
+import { usePageTracking } from './hooks/useAnalytics';
 
 // Styles
 import './App.css';
 import './index.css';
+
+const PageTracker = () => {
+  usePageTracking();
+  return null;
+};
 
 const AuthInit = ({ children }) => {
   const dispatch = useDispatch();
@@ -69,11 +82,7 @@ const AuthInit = ({ children }) => {
   }, [dispatch]);
 
   if (isInitializing) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 transition-colors">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
+    return <FullscreenLoader text="Initializing App..." />;
   }
 
   return children;
@@ -84,14 +93,19 @@ function App() {
 
   return (
     <Provider store={store}>
-      <AuthInit>
-        <ThemeProvider>
+      <HelmetProvider>
+      <ErrorBoundary>
+        <AuthInit>
+          <ThemeProvider>
           <GoogleOAuthProvider clientId={googleClientId}>
             <Router>
+              <PageTracker />
               <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors">
+              <NetworkStatus />
               <Navbar />
               <main className="flex-1">
-                <Routes>
+                <Suspense fallback={<FullscreenLoader text="Loading..." />}>
+                  <Routes>
                   {/* Public Routes */}
                   <Route path="/" element={<Home />} />
                   <Route path="/login" element={<Login />} />
@@ -107,6 +121,7 @@ function App() {
                   <Route path="/categories" element={<Products />} />
                   <Route path="/deals" element={<Products />} />
                   <Route path="/ai-shopping" element={<AIShopping />} />
+                  <Route path="/feedback" element={<ActionFeedback />} />
 
                   {/* Protected Routes */}
                   <Route
@@ -160,24 +175,19 @@ function App() {
                   />
 
                   {/* 404 */}
-                  <Route
-                    path="*"
-                    element={
-                      <div className="container mx-auto px-4 py-20 text-center">
-                        <h1 className="text-4xl font-bold text-gray-900 dark:text-white">404</h1>
-                        <p className="text-gray-600 dark:text-gray-400 mt-2">Page not found</p>
-                      </div>
-                    }
-                  />
+                  <Route path="*" element={<NotFound />} />
                 </Routes>
+                </Suspense>
               </main>
               <Footer />
+              <ToastContainer position="bottom-right" autoClose={4000} hideProgressBar={true} />
             </div>
           </Router>
           </GoogleOAuthProvider>
         </ThemeProvider>
       </AuthInit>
-      <ToastContainer position="bottom-right" autoClose={3000} theme="colored" />
+      </ErrorBoundary>
+      </HelmetProvider>
     </Provider>
   );
 }

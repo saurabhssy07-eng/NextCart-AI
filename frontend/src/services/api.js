@@ -11,7 +11,17 @@ const customFetch = async (url, options = {}) => {
   options.credentials = 'include'; // Ensures HttpOnly cookies are sent
   options.headers = { ...getHeaders(), ...options.headers };
 
-  let response = await fetch(url, options);
+  let response;
+  try {
+    response = await fetch(url, options);
+    window.dispatchEvent(new Event('backend:reachable'));
+  } catch (err) {
+    if (err.name === 'TypeError' || err.message === 'Failed to fetch') {
+      window.dispatchEvent(new Event('backend:unreachable'));
+      throw new Error('Network error: Cannot reach server');
+    }
+    throw err;
+  }
 
   // If unauthorized (and not trying to login/refresh), attempt refresh
   if (response.status === 401 && !url.includes('/auth/login') && !url.includes('/auth/refresh-token')) {

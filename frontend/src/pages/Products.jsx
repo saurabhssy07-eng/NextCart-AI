@@ -5,8 +5,11 @@ import { productService, categoryService, cartService, userService } from '../se
 import { useSelector, useDispatch } from 'react-redux';
 import { setCart } from '../store/cartSlice';
 import { setUser } from '../store/authSlice';
+import { Filter, X, ChevronDown, Check, SearchX } from 'lucide-react';
 import ProductCard from '../components/product/ProductCard';
 import { ProductCardSkeleton } from '../components/Skeleton';
+import EmptyState from '../components/ui/EmptyState';
+import { useTheme } from '../context/ThemeContext';
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -208,14 +211,14 @@ const Products = () => {
           <p className="text-gray-600 dark:text-gray-400 text-lg">Loading products...</p>
         </div>
       ) : products.length === 0 ? (
-        <div className="text-center py-20">
-          <p className="text-gray-600 dark:text-gray-400 text-lg">No products found</p>
-          <button
-            onClick={() => setFilters({ search: '', category: '', sort: '-createdAt', page: 1 })}
-            className="mt-4 text-blue-600 hover:underline"
-          >
-            Clear Filters
-          </button>
+        <div className="py-12 max-w-2xl mx-auto">
+          <EmptyState 
+            icon={SearchX} 
+            title="No products found" 
+            description={filters.search ? `No results found for "${filters.search}". Try another keyword.` : "We couldn't find any products matching your filters."}
+            actionLabel="Clear Filters"
+            onAction={() => setFilters({ search: '', category: '', sort: '-createdAt', page: 1 })}
+          />
         </div>
       ) : (
         <>
