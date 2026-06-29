@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTheme } from '../../../context/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import { Moon, Sun, Monitor, Globe, IndianRupee, Mail, Bell, Shield } from 'lucide-react';
 import { toast } from 'react-toastify';
 
