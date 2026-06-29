@@ -101,9 +101,7 @@ const Navbar = () => {
                 className="w-full pl-11 pr-12 py-2.5 bg-gray-100 dark:bg-gray-800 border-transparent focus:bg-white dark:focus:bg-gray-900 border focus:border-primary-500 rounded-xl outline-none transition-all text-sm text-gray-900 dark:text-gray-100"
               />
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden md:flex gap-1">
-                <kbd className="hidden lg:inline-flex items-center justify-center px-1.5 py-0.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-[10px] font-medium text-gray-500 dark:text-gray-400">Ctrl K</kbd>
-              </div>
+
             </form>
           </div>
 

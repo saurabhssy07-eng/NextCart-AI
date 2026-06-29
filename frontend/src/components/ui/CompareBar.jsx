@@ -30,7 +30,7 @@ const CompareBar = () => {
               >
                 <X className="w-3 h-3" />
               </button>
-              <img src={item.image || item.images?.[0]} alt={item.name} className="w-10 h-10 object-cover rounded bg-white dark:bg-gray-900" />
+              <img src={item.image || item.images?.[0]?.url || 'https://placehold.co/100x100/1a1a1a/ffffff?text=No+Image'} alt={item.name} className="w-10 h-10 object-cover rounded bg-white dark:bg-gray-900" />
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-gray-900 dark:text-white truncate">{item.name}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">₹{item.price?.toLocaleString('en-IN')}</p>

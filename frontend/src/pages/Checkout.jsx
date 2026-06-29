@@ -316,8 +316,50 @@ const Checkout = () => {
                 />
               </div>
             </div>
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-8">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                <span>💳</span> Payment Method
+              </h2>
+              <div className="space-y-4">
+                <label className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                  formData.paymentMethod === 'online' 
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' 
+                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                }`}>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="online"
+                    checked={formData.paymentMethod === 'online'}
+                    onChange={handleChange}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  />
+                  <div className="flex flex-col">
+                    <span className="font-medium text-gray-900 dark:text-white">Pay Online Securely</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Cards, UPI, Net Banking</span>
+                  </div>
+                </label>
 
-
+                <label className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                  formData.paymentMethod === 'cod' 
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' 
+                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                }`}>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="cod"
+                    checked={formData.paymentMethod === 'cod'}
+                    onChange={handleChange}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  />
+                  <div className="flex flex-col">
+                    <span className="font-medium text-gray-900 dark:text-white">Cash on Delivery</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Pay when you receive the order</span>
+                  </div>
+                </label>
+              </div>
+            </div>
 
             {/* Submit Button */}
             <button

@@ -139,7 +139,8 @@ const OrderDetails = () => {
   };
 
   const timelineSteps = ['Pending', 'Confirmed', 'Packed', 'Shipped', 'Out For Delivery', 'Delivered'];
-  const currentStepIndex = timelineSteps.indexOf(currentOrder.orderStatus);
+  const normalizedStatus = currentOrder.orderStatus?.charAt(0).toUpperCase() + currentOrder.orderStatus?.slice(1).toLowerCase();
+  const currentStepIndex = timelineSteps.indexOf(normalizedStatus);
   
   const isCancelled = currentOrder.orderStatus === 'Cancelled';
   const isReturned = currentOrder.orderStatus === 'Returned';
@@ -191,7 +192,7 @@ const OrderDetails = () => {
                 </p>
               </div>
               <div className="mt-4 sm:mt-0 flex space-x-3">
-                {shouldShowTimeline && (currentOrder.orderStatus === 'Pending' || currentOrder.orderStatus === 'Confirmed') && (
+                {shouldShowTimeline && ['Pending', 'Confirmed', 'pending', 'confirmed'].includes(currentOrder.orderStatus) && (
                   <button
                     onClick={handleCancelOrder}
                     className="px-4 py-2 bg-white border border-red-300 rounded-lg shadow-sm text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
@@ -390,7 +391,7 @@ const OrderDetails = () => {
           </div>
 
           {/* Cancel Button */}
-          {['Pending', 'Confirmed'].includes(currentOrder.orderStatus) && (
+          {['Pending', 'Confirmed', 'pending', 'confirmed'].includes(currentOrder.orderStatus) && (
             <button
               onClick={handleCancelOrder}
               className="w-full px-4 py-3 text-red-600 font-medium border-2 border-red-200 rounded-lg hover:bg-red-50 hover:border-red-300 transition-colors"

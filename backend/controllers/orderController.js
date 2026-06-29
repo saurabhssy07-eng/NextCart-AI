@@ -110,7 +110,7 @@ export const createOrder = async (req, res) => {
 
     let razorpayOrder = null;
     if (paymentMethod !== 'cod') {
-      razorpayOrder = await paymentService.createRazorpayOrder(order.orderSummary.total, order.orderNumber);
+      razorpayOrder = await paymentService.createRazorpayOrder(order.orderSummary.total, order._id);
     } else {
       order.orderStatus = 'Confirmed';
       order.timeline.push({

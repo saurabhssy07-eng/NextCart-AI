@@ -6,7 +6,7 @@ export const generateInvoice = (order, res) => {
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader(
     'Content-Disposition',
-    `attachment; filename=Invoice-${order.invoiceNumber || order.orderNumber}.pdf`
+    `attachment; filename=Invoice-${order.invoiceNumber || order._id}.pdf`
   );
 
   doc.pipe(res);
@@ -41,7 +41,7 @@ function generateCustomerInformation(doc, order) {
   doc
     .fontSize(10)
     .text(`Invoice Number: ${order.invoiceNumber || 'N/A'}`, 50, 140)
-    .text(`Order Number: ${order.orderNumber}`, 50, 155)
+    .text(`Order Number: ${order._id}`, 50, 155)
     .text(`Invoice Date: ${new Date(order.invoiceGeneratedAt || order.createdAt).toLocaleDateString('en-IN')}`, 50, 170)
     
     .text('Billed To:', 300, 140)

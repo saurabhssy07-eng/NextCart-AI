@@ -78,7 +78,7 @@ const Compare = () => {
                   </button>
                   <div className="flex flex-col items-center text-center">
                     <OptimizedImage 
-                      src={item.image || item.images?.[0]} 
+                      src={item.image || item.images?.[0]?.url || 'https://placehold.co/400x400/1a1a1a/ffffff?text=No+Image'} 
                       alt={item.name} 
                       className="w-32 h-32 object-contain mb-4 bg-white rounded-lg mix-blend-multiply dark:mix-blend-normal" 
                     />
