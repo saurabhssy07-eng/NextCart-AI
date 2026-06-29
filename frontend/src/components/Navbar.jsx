@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,6 +20,7 @@ const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const searchInputRef = useRef(null);
 
   const cartItemsCount = items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
   const wishlistCount = user?.wishlist?.length || 0;
@@ -28,6 +29,20 @@ const Navbar = () => {
     setIsMobileMenuOpen(false);
     setIsProfileDropdownOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      } else if (e.key === '/' && document.activeElement !== searchInputRef.current && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -78,13 +93,17 @@ const Navbar = () => {
           <div className="hidden lg:block flex-1 max-w-2xl">
             <form onSubmit={handleSearch} className="relative">
               <input
+                ref={searchInputRef}
                 type="text"
                 placeholder="Search for products, brands and more..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-11 pr-4 py-2.5 bg-gray-100 dark:bg-gray-800 border-transparent focus:bg-white dark:focus:bg-gray-900 border focus:border-primary-500 rounded-xl outline-none transition-all text-sm text-gray-900 dark:text-gray-100"
+                className="w-full pl-11 pr-12 py-2.5 bg-gray-100 dark:bg-gray-800 border-transparent focus:bg-white dark:focus:bg-gray-900 border focus:border-primary-500 rounded-xl outline-none transition-all text-sm text-gray-900 dark:text-gray-100"
               />
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden md:flex gap-1">
+                <kbd className="hidden lg:inline-flex items-center justify-center px-1.5 py-0.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-[10px] font-medium text-gray-500 dark:text-gray-400">Ctrl K</kbd>
+              </div>
             </form>
           </div>
 

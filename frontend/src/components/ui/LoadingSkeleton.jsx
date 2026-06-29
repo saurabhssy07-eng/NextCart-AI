@@ -70,4 +70,33 @@ export const OrderSkeleton = () => (
   </div>
 );
 
+export const CartSkeleton = () => (
+  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div className="lg:col-span-2 space-y-4">
+      {[1, 2].map(i => (
+        <div key={i} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 flex flex-col sm:flex-row gap-4">
+          <Skeleton className="w-full sm:w-32 h-32 rounded-lg" />
+          <div className="flex-1 space-y-4">
+            <Skeleton className="h-6 w-3/4" />
+            <Skeleton className="h-4 w-1/4" />
+            <div className="flex justify-between items-center mt-4">
+              <Skeleton className="h-10 w-24 rounded-lg" />
+              <Skeleton className="h-6 w-20" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 h-fit">
+      <Skeleton className="h-8 w-1/2 mb-6" />
+      <div className="space-y-4 mb-6">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-6 w-full mt-4" />
+      </div>
+      <Skeleton className="h-10 w-full rounded-lg" />
+    </div>
+  </div>
+);
+
 export default Skeleton;

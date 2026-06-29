@@ -142,54 +142,59 @@ const ProfileInfo = () => {
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Profile Information</h1>
       
       {/* Avatar Section */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-10 pb-8 border-b border-gray-100 dark:border-gray-700">
-        <div className="relative">
-          <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-700">
+      <div className="flex flex-col items-center justify-center mb-10 pb-8 border-b border-gray-100 dark:border-gray-700">
+        <div className="relative group">
+          <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white dark:border-gray-800 shadow-md bg-gray-100 dark:bg-gray-700 relative">
             {user?.avatar?.url && user.avatar.url !== 'https://via.placeholder.com/150' ? (
               <img src={user.avatar.url} alt="Avatar" className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-400">
-                <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+              </div>
+            )}
+
+            {/* Hover Overlay */}
+            <div 
+              onClick={() => !isUploading && fileInputRef.current.click()}
+              className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-10"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span className="text-xs font-medium">Change Photo</span>
+            </div>
+
+            {isUploading && (
+              <div className="absolute inset-0 bg-white/80 dark:bg-black/80 flex items-center justify-center z-20">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400"></div>
               </div>
             )}
           </div>
-          {isUploading && (
-            <div className="absolute inset-0 bg-white/60 dark:bg-black/60 rounded-full flex items-center justify-center">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 dark:border-blue-400"></div>
-            </div>
+          
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleAvatarChange} 
+            accept="image/jpeg,image/png,image/webp,image/jpg" 
+            className="hidden" 
+          />
+
+          {user?.avatar?.publicId && !isUploading && (
+            <button 
+              onClick={handleDeleteAvatar}
+              className="absolute bottom-0 right-0 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-sm z-30"
+              title="Remove Avatar"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
           )}
         </div>
-        <div>
-          <div className="flex gap-3 mb-2">
-            <button 
-              onClick={() => fileInputRef.current.click()}
-              disabled={isUploading}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
-            >
-              Upload New Photo
-            </button>
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              onChange={handleAvatarChange} 
-              accept="image/jpeg,image/png,image/webp,image/jpg" 
-              className="hidden" 
-            />
-            
-            {user?.avatar?.publicId && (
-              <button 
-                onClick={handleDeleteAvatar}
-                disabled={isUploading}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
-              >
-                Remove
-              </button>
-            )}
-          </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            JPG, PNG or WEBP. Max size of 2MB.
-          </p>
-        </div>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 text-center">
+          JPG, PNG or WEBP. Max 2MB.
+        </p>
       </div>
 
       {/* Form Section */}

@@ -100,24 +100,32 @@ const ReviewSection = ({ product }) => {
       <div className="flex flex-col lg:flex-row gap-12">
         {/* Left Column: Stats & Summary */}
         <div className="lg:w-1/3">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Customer Reviews</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Customer Reviews</h2>
           
-          <div className="flex items-center gap-4 mb-8">
-            <div className="text-6xl font-bold text-gray-900 dark:text-white">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="text-5xl font-bold text-gray-900 dark:text-white">
               {product.rating?.toFixed(1) || '0.0'}
             </div>
             <div>
               <div className="flex text-yellow-400 mb-1">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} className={`w-6 h-6 ${star <= Math.round(product.rating || 0) ? 'fill-current' : 'text-gray-200 dark:text-gray-700'}`} />
+                  <Star key={star} className={`w-5 h-5 ${star <= Math.round(product.rating || 0) ? 'fill-current' : 'text-gray-200 dark:text-gray-700'}`} />
                 ))}
               </div>
-              <p className="text-gray-500 dark:text-gray-400">{product.reviews || 0} global ratings</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{product.reviews || 0} global ratings</p>
             </div>
           </div>
 
+          {!showForm && (
+            <div className="mb-6">
+              <Button onClick={() => setShowForm(true)} className="w-full">
+                {userExistingReview ? 'Edit Your Review' : 'Write a Review'}
+              </Button>
+            </div>
+          )}
+
           {/* Distribution Bars */}
-          <div className="space-y-3 mb-8">
+          <div className="space-y-2 mb-6">
             {[5, 4, 3, 2, 1].map(star => {
               const count = distribution[star] || 0;
               const percentage = Math.round((count / totalDistCount) * 100);
@@ -133,15 +141,10 @@ const ReviewSection = ({ product }) => {
             })}
           </div>
 
-          {!showForm && (
-            <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-2xl border border-gray-100 dark:border-gray-700">
-              <h4 className="font-bold text-gray-900 dark:text-white mb-2">Review this product</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Share your thoughts with other customers</p>
-              <Button onClick={() => setShowForm(true)} className="w-full">
-                {userExistingReview ? 'Edit Your Review' : 'Write a Review'}
-              </Button>
-            </div>
-          )}
+          {/* Customer Photos moved to left column */}
+          <div className="mb-6">
+            <CustomerPhotos reviews={reviews} />
+          </div>
         </div>
 
         {/* Right Column: Review List & Form */}
@@ -155,9 +158,6 @@ const ReviewSection = ({ product }) => {
             />
           ) : (
             <>
-              {/* Customer Photos */}
-              <CustomerPhotos reviews={reviews} />
-
               {/* Toolbar */}
               <div className="flex flex-col sm:flex-row justify-between items-center mb-6 pb-4 border-b border-gray-200 dark:border-gray-800 gap-4">
                 <div className="text-gray-700 dark:text-gray-300 font-medium">

@@ -68,7 +68,7 @@ const ProductCard = ({
 
   return (
     <motion.div
-      className={`group relative bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-primary-200 dark:hover:border-primary-800 flex ${compact ? 'h-40 flex-row' : 'h-[420px] flex-col'}`}
+      className={`group relative hover:z-20 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-primary-200 dark:hover:border-primary-800 flex ${compact ? 'h-40 flex-row' : 'h-[420px] flex-col'}`}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
     >
@@ -99,26 +99,27 @@ const ProductCard = ({
           {isNew && <Badge variant="success">New</Badge>}
         </div>
 
-        {/* Wishlist Button */}
+        {/* Wishlist Button (Mobile Only) */}
         {showWishlist && (
-          <Tooltip content={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"} position="left">
-              <motion.button
-                whileTap={{ scale: 0.85 }}
-                whileHover={{ scale: 1.1 }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  onWishlistToggle?.(product._id);
-                }}
-                className={`absolute top-2 right-2 z-10 p-2 rounded-full backdrop-blur-md shadow-sm border transition-colors ${
-                  isWishlisted 
-                    ? 'bg-red-50 dark:bg-red-900/20 text-red-500 border-red-100 dark:border-red-900/30' 
-                    : 'bg-white/90 dark:bg-gray-800/90 text-gray-400 hover:text-red-500 border-gray-200 dark:border-gray-700'
-                }`}
-                aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-              >
-                <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
-              </motion.button>
-          </Tooltip>
+          <div className="md:hidden">
+            <Tooltip content={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"} position="left">
+                <motion.button
+                  whileTap={{ scale: 0.85 }}
+                  className={`absolute top-2 right-2 z-10 p-2 rounded-full shadow-sm border transition-colors ${
+                    isWishlisted 
+                      ? 'bg-red-50 dark:bg-red-900/20 text-red-500 border-red-100 dark:border-red-900/30' 
+                      : 'bg-white/90 dark:bg-gray-800/90 text-gray-400 border-gray-200 dark:border-gray-700'
+                  }`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onWishlistToggle?.(product._id);
+                  }}
+                  aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                >
+                  <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
+                </motion.button>
+            </Tooltip>
+          </div>
         )}
 
         {/* Quick Actions Overlay (Desktop only) */}
@@ -129,57 +130,52 @@ const ProductCard = ({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
-                className="absolute bottom-2 inset-x-2 flex justify-center gap-2 z-10 hidden md:flex"
+                className="absolute inset-x-2 bottom-2 flex flex-col gap-2 z-10 hidden md:flex"
               >
-                {showAddToCart && (
-                  product.variants?.length > 0 ? (
-                    <Link to={`/products/${product._id}`} className="flex-1">
-                      <Button size="sm" className="w-full rounded-lg py-1.5">
-                        Select Options
-                      </Button>
-                    </Link>
-                  ) : (
-                    <Button 
-                      size="sm" 
-                      className="flex-1 rounded-lg py-1.5"
-                      onClick={() => onAddToCart?.(product._id)}
-                    >
-                      Add to Cart
-                    </Button>
-                  )
-                )}
                 {showQuickView && (
-                  <Tooltip content="Quick View">
+                  <Button 
+                    variant="secondary" 
+                    size="sm" 
+                    className="w-full rounded-lg bg-white/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:bg-white text-gray-800 dark:bg-gray-800/90 dark:text-gray-200"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (onQuickView) onQuickView(product);
+                      else toast.info('Quick View coming in Phase 5.8!');
+                    }}
+                  >
+                    <Eye className="w-4 h-4 mr-2" /> Quick View
+                  </Button>
+                )}
+                
+                <div className="flex gap-2">
+                  {showWishlist && (
                     <Button 
                       variant="secondary" 
-                      size="icon" 
-                      className="rounded-lg shrink-0"
+                      size="sm" 
+                      className={`flex-1 rounded-lg bg-white/90 backdrop-blur-sm border hover:bg-white dark:bg-gray-800/90 ${isWishlisted ? 'text-red-500 border-red-200 dark:border-red-900/50' : 'text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700'}`}
                       onClick={(e) => {
                         e.preventDefault();
-                        if (onQuickView) onQuickView(product);
-                        else toast.info('Quick View coming in Phase 5.8!');
+                        onWishlistToggle?.(product._id);
                       }}
                     >
-                      <Eye className="w-4 h-4" />
+                      <Heart className={`w-4 h-4 mr-2 ${isWishlisted ? 'fill-current' : ''}`} /> Wishlist
                     </Button>
-                  </Tooltip>
-                )}
-                {showCompare && (
-                  <Tooltip content="Compare">
+                  )}
+                  {showCompare && (
                     <Button 
                       variant="secondary" 
-                      size="icon" 
-                      className="rounded-lg shrink-0"
+                      size="sm" 
+                      className="flex-1 rounded-lg bg-white/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:bg-white text-gray-700 dark:bg-gray-800/90 dark:text-gray-200"
                       onClick={(e) => {
                         e.preventDefault();
                         if (onCompare) onCompare(product);
                         else toast.info('Product Comparison coming in Phase 5.8!');
                       }}
                     >
-                      <BarChart2 className="w-4 h-4" />
+                      <BarChart2 className="w-4 h-4 mr-2" /> Compare
                     </Button>
-                  </Tooltip>
-                )}
+                  )}
+                </div>
               </motion.div>
             )}
           </AnimatePresence>

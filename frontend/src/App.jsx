@@ -22,6 +22,7 @@ import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
 import OrderDetails from './pages/OrderDetails';
+import AIShopping from './pages/AIShopping';
 import MyAccountLayout from './pages/account/MyAccountLayout';
 import Dashboard from './pages/account/Dashboard';
 import ProfileInfo from './pages/account/ProfileInfo';
@@ -101,7 +102,7 @@ function App() {
                   <Route path="/products/:id" element={<ProductDetails />} />
                   <Route path="/categories" element={<Products />} />
                   <Route path="/deals" element={<Products />} />
-                  <Route path="/ai-shopping" element={<div className="container mx-auto px-4 py-32 text-center"><h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">AI Shopping Assistant</h1><p className="text-xl text-gray-500 max-w-2xl mx-auto">Coming soon in Phase 6! Get ready for a revolutionary personalized shopping experience powered by artificial intelligence.</p></div>} />
+                  <Route path="/ai-shopping" element={<AIShopping />} />
 
                   {/* Protected Routes */}
                   <Route

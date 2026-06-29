@@ -67,46 +67,47 @@ const Orders = () => {
           onAction={() => navigate('/products')}
         />
       ) : (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="text-left px-6 py-3">Order Number</th>
-                <th className="text-left px-6 py-3">Date</th>
-                <th className="text-left px-6 py-3">Items</th>
-                <th className="text-right px-6 py-3">Total</th>
-                <th className="text-center px-6 py-3">Status</th>
-                <th className="text-center px-6 py-3">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((order) => (
-                <tr key={order._id} className="border-t hover:bg-gray-50">
-                  <td className="px-6 py-4 font-semibold">{order.orderNumber}</td>
-                  <td className="px-6 py-4">
-                    {new Date(order.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4">{order.items.length} item(s)</td>
-                  <td className="text-right px-6 py-4 font-semibold">
-                    ₹{order.orderSummary.total.toLocaleString('en-IN')}
-                  </td>
-                  <td className="text-center px-6 py-4">
+        <div className="space-y-4">
+          {orders.map((order) => (
+            <div key={order._id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 transition-shadow hover:shadow-md">
+              <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                      Order #{order.orderNumber}
+                    </h3>
                     <Badge variant={getStatusColor(order.orderStatus)}>
                       {order.orderStatus}
                     </Badge>
-                  </td>
-                  <td className="text-center px-6 py-4">
-                    <Link
-                      to={`/orders/${order._id}`}
-                      className="text-blue-600 hover:underline"
-                    >
-                      View Details
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                  
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                    ₹{order.orderSummary.total.toLocaleString('en-IN')}
+                  </div>
+                  
+                  <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                    <span className="flex items-center gap-1">
+                      <Package className="w-4 h-4" />
+                      {order.items.length} Item{order.items.length !== 1 ? 's' : ''}
+                    </span>
+                    <span>•</span>
+                    <span>
+                      {new Date(order.createdAt).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="mt-2 sm:mt-0">
+                  <Link
+                    to={`/orders/${order._id}`}
+                    className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors w-full sm:w-auto"
+                  >
+                    View Details
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
