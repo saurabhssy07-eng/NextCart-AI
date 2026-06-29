@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { setCurrentOrder, setLoading } from '../store/orderSlice';
-import { orderService } from '../services/api';
+import { orderService, paymentService } from '../services/api';
 import { getEstimatedDelivery } from '../utils/dateUtils';
 
 const OrderDetails = () => {
@@ -48,6 +48,52 @@ const OrderDetails = () => {
       } catch (error) {
         toast.error('Failed to cancel order');
       }
+    }
+  };
+
+  const handleRetryPayment = async () => {
+    try {
+      const response = await paymentService.retryPayment(id);
+      
+      if (response.success && response.data.razorpayOrderId) {
+        const options = {
+          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+          amount: response.data.amount,
+          currency: response.data.currency,
+          name: import.meta.env.VITE_APP_NAME || 'NextCart AI',
+          description: 'Order Payment',
+          order_id: response.data.razorpayOrderId,
+          handler: async function (paymentResponse) {
+            try {
+              const verifyRes = await paymentService.verifyPayment(id, paymentResponse);
+              if (verifyRes.success) {
+                toast.success('Payment successful!');
+                loadOrder(); // Refresh the order
+              } else {
+                toast.error('Payment verification failed.');
+              }
+            } catch (err) {
+              toast.error('Payment verification error.');
+            }
+          },
+          prefill: {
+            name: `${currentOrder.user?.firstName || ''} ${currentOrder.user?.lastName || ''}`,
+            email: currentOrder.user?.email,
+          },
+          theme: { color: '#2563EB' }
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.on('payment.failed', function (errResp) {
+          toast.error(errResp.error.description);
+        });
+        rzp.open();
+      } else {
+        toast.error('Failed to initiate payment retry');
+      }
+    } catch (error) {
+      console.error('Retry payment error:', error);
+      toast.error('Failed to initiate payment retry');
     }
   };
 
@@ -248,6 +294,14 @@ const OrderDetails = () => {
             <p className="text-sm text-gray-500 mt-2">
               Status: <span className="font-medium capitalize">{currentOrder.paymentStatus}</span>
             </p>
+            {['Pending', 'Failed'].includes(currentOrder.paymentStatus) && currentOrder.paymentMethod !== 'cod' && (
+              <button
+                onClick={handleRetryPayment}
+                className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              >
+                Retry Payment
+              </button>
+            )}
           </div>
 
           {/* Cancel Button */}

@@ -28,6 +28,7 @@ import Dashboard from './pages/account/Dashboard';
 import ProfileInfo from './pages/account/ProfileInfo';
 import AddressManager from './pages/account/AddressManager';
 import Wishlist from './pages/account/Wishlist';
+import OrderSuccess from './pages/OrderSuccess';
 
 // Components
 import Navbar from './components/Navbar';
@@ -100,6 +101,9 @@ function App() {
                   <Route path="/verify-email/:token" element={<VerifyEmail />} />
                   <Route path="/products" element={<Products />} />
                   <Route path="/products/:id" element={<ProductDetails />} />
+                  <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+                  <Route path="/order-success/:id" element={<ProtectedRoute><OrderSuccess /></ProtectedRoute>} />
+                  <Route path="/orders/:id" element={<ProtectedRoute><OrderDetails /></ProtectedRoute>} />
                   <Route path="/categories" element={<Products />} />
                   <Route path="/deals" element={<Products />} />
                   <Route path="/ai-shopping" element={<AIShopping />} />

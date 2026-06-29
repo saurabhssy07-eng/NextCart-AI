@@ -396,6 +396,21 @@ export const userService = {
   },
 };
 
+// ============= PAYMENT SERVICES =============
+export const paymentService = {
+  verifyPayment: async (orderId, paymentData) => {
+    return customFetch(`${API_BASE_URL}/payments/orders/${orderId}/verify`, {
+      method: 'POST',
+      body: JSON.stringify(paymentData),
+    });
+  },
+  retryPayment: async (orderId) => {
+    return customFetch(`${API_BASE_URL}/payments/orders/${orderId}/retry`, {
+      method: 'POST',
+    });
+  },
+};
+
 export default {
   authService,
   productService,
@@ -404,4 +419,5 @@ export default {
   orderService,
   userService,
   reviewService,
+  paymentService,
 };

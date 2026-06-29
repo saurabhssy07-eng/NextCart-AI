@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { clearCart } from '../store/cartSlice';
 import { addOrder } from '../store/orderSlice';
-import { orderService, cartService } from '../services/api';
+import { orderService, cartService, paymentService } from '../services/api';
 import { getEstimatedDelivery } from '../utils/dateUtils';
 import { Truck } from 'lucide-react';
 
@@ -247,8 +247,58 @@ const Checkout = () => {
       if (response.success) {
         dispatch(clearCart());
         dispatch(addOrder(response.data));
-        toast.success('Order placed successfully!');
-        navigate(`/orders/${response.data._id}`);
+        
+        if (formData.paymentMethod !== 'cod' && response.razorpayOrder) {
+          const options = {
+            key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+            amount: response.razorpayOrder.amount,
+            currency: response.razorpayOrder.currency,
+            name: import.meta.env.VITE_APP_NAME || 'NextCart AI',
+            description: 'Order Payment',
+            order_id: response.razorpayOrder.id,
+            handler: async function (paymentResponse) {
+              try {
+                const verifyRes = await paymentService.verifyPayment(response.data._id, paymentResponse);
+                if (verifyRes.success) {
+                  toast.success('Payment successful!');
+                  navigate(`/order-success/${response.data._id}`);
+                } else {
+                  toast.error('Payment verification failed.');
+                  navigate(`/orders/${response.data._id}`);
+                }
+              } catch (err) {
+                toast.error('Payment verification error.');
+                navigate(`/orders/${response.data._id}`);
+              }
+            },
+            prefill: {
+              name: `${user?.firstName || ''} ${user?.lastName || ''}`,
+              email: user?.email,
+              contact: formData.phoneNumber,
+            },
+            theme: {
+              color: '#2563EB',
+            },
+            modal: {
+              ondismiss: function () {
+                toast.warning('Payment was not completed. You can retry from your orders page.');
+                navigate(`/orders/${response.data._id}`);
+              }
+            }
+          };
+
+          const rzp = new window.Razorpay(options);
+          
+          rzp.on('payment.failed', function (errResp) {
+            toast.error(errResp.error.description);
+            // Optionally could navigate or leave them on page
+          });
+
+          rzp.open();
+        } else {
+          toast.success('Order placed successfully!');
+          navigate(`/order-success/${response.data._id}`);
+        }
       } else {
         toast.error(response.message || 'Failed to place order');
       }
@@ -638,6 +688,19 @@ const Checkout = () => {
                 </span>
               )}
             </button>
+            {formData.paymentMethod !== 'cod' && (
+              <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-500 font-medium">
+                <span className="opacity-75">Secured by</span>
+                <div className="flex items-center gap-1 font-bold text-[#3395FF]">
+                  Razorpay
+                </div>
+                <div className="flex gap-1 ml-2 text-xl opacity-60">
+                  <span>📱</span>
+                  <span>💳</span>
+                  <span>🏦</span>
+                </div>
+              </div>
+            )}
           </form>
         </div>
 

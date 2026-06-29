@@ -1,4 +1,5 @@
 import { Order, Cart, Product } from '../models/index.js';
+import paymentService from '../services/paymentService.js';
 
 // CREATE order from cart
 export const createOrder = async (req, res) => {
@@ -93,10 +94,16 @@ export const createOrder = async (req, res) => {
 
     await order.populate('user', 'firstName lastName email');
 
+    let razorpayOrder = null;
+    if (paymentMethod !== 'cod') {
+      razorpayOrder = await paymentService.createRazorpayOrder(order.orderSummary.total, order.orderNumber);
+    }
+
     res.status(201).json({
       success: true,
       message: 'Order created successfully',
       data: order,
+      razorpayOrder,
     });
   } catch (error) {
     console.error('❌ Create order error:', error.message);

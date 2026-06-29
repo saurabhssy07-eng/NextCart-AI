@@ -10,6 +10,7 @@ import cartRoutes from './routes/cart.js';
 import orderRoutes from './routes/orders.js';
 import userRoutes from './routes/users.js';
 import reviewRoutes from './routes/reviews.js';
+import paymentRoutes from './routes/paymentRoutes.js';
 
 const app = express();
 const startTime = Date.now();
@@ -44,6 +45,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/payments', paymentRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({
