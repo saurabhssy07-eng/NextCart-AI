@@ -279,9 +279,17 @@ export const orderService = {
     });
   },
 
-  downloadInvoice: async (id) => {
+  downloadInvoice: async (id, accessToken) => {
+    const headers = {
+      'Content-Type': 'application/pdf',
+    };
+    if (accessToken) {
+      headers['Authorization'] = `Bearer ${accessToken}`;
+    }
+
     const response = await fetch(`${API_BASE_URL}/orders/${id}/invoice`, {
       method: 'GET',
+      headers,
       credentials: 'include'
     });
     

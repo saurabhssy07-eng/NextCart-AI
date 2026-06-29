@@ -5,8 +5,9 @@ import { Heart, ShoppingCart, Eye, BarChart2, Star } from 'lucide-react';
 import Badge from '../ui/Badge';
 import Button from '../ui/Button';
 import Tooltip from '../ui/Tooltip';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
+import { toggleCompare } from '../../store/compareSlice';
 
 const colorMap = {
   black: '#000000',
@@ -45,6 +46,10 @@ const ProductCard = ({
   const isWishlisted = user?.wishlist?.some(item => 
     (typeof item === 'string' ? item : item._id) === product._id
   );
+  
+  const dispatch = useDispatch();
+  const compareItems = useSelector((state) => state.compare?.items || []);
+  const isCompared = compareItems.some(item => item._id === product._id);
   
   const price = product.price;
   const discountPrice = product.discountPrice;
@@ -165,14 +170,30 @@ const ProductCard = ({
                     <Button 
                       variant="secondary" 
                       size="sm" 
-                      className="flex-1 rounded-lg bg-white/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:bg-white text-gray-700 dark:bg-gray-800/90 dark:text-gray-200"
+                      className={`flex-1 rounded-lg backdrop-blur-sm border transition-colors ${
+                        isCompared 
+                          ? 'bg-blue-50/90 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800' 
+                          : 'bg-white/90 border-gray-200 hover:bg-white text-gray-700 dark:bg-gray-800/90 dark:border-gray-700 dark:text-gray-200'
+                      }`}
                       onClick={(e) => {
                         e.preventDefault();
-                        if (onCompare) onCompare(product);
-                        else toast.info('Product Comparison coming in Phase 5.8!');
+                        if (onCompare) {
+                          onCompare(product);
+                        } else {
+                          dispatch(toggleCompare(product));
+                        }
                       }}
                     >
-                      <BarChart2 className="w-4 h-4 mr-2" /> Compare
+                      {isCompared ? (
+                        <>
+                          <span className="w-4 h-4 mr-2 flex items-center justify-center font-bold text-lg">✓</span> 
+                          Added
+                        </>
+                      ) : (
+                        <>
+                          <BarChart2 className="w-4 h-4 mr-2" /> Compare
+                        </>
+                      )}
                     </Button>
                   )}
                 </div>

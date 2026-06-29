@@ -20,6 +20,7 @@ import ResetPassword from './pages/ResetPassword';
 import VerifyEmail from './pages/VerifyEmail';
 import NotFound from './pages/NotFound';
 import ActionFeedback from './pages/ActionFeedback';
+import CompareBar from './components/ui/CompareBar';
 
 // Lazy-loaded Pages
 const Cart = lazy(() => import('./pages/Cart'));
@@ -32,7 +33,11 @@ const Dashboard = lazy(() => import('./pages/account/Dashboard'));
 const ProfileInfo = lazy(() => import('./pages/account/ProfileInfo'));
 const AddressManager = lazy(() => import('./pages/account/AddressManager'));
 const Wishlist = lazy(() => import('./pages/account/Wishlist'));
+const Notifications = lazy(() => import('./pages/account/Notifications'));
+const Security = lazy(() => import('./pages/account/Security'));
+const Settings = lazy(() => import('./pages/account/Settings'));
 const OrderSuccess = lazy(() => import('./pages/OrderSuccess'));
+const Compare = lazy(() => import('./pages/Compare'));
 
 // Components
 import Navbar from './components/Navbar';
@@ -110,6 +115,7 @@ function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
+                  <Route path="/compare" element={<Compare />} />
                   <Route path="/forgot-password" element={<ForgotPassword />} />
                   <Route path="/reset-password/:token" element={<ResetPassword />} />
                   <Route path="/verify-email/:token" element={<VerifyEmail />} />
@@ -137,9 +143,9 @@ function App() {
                     <Route path="addresses" element={<AddressManager />} />
                     <Route path="wishlist" element={<Wishlist />} />
                     <Route path="orders" element={<Orders />} />
-                    <Route path="notifications" element={<div className="p-8">Notifications (Coming Soon)</div>} />
-                    <Route path="security" element={<div className="p-8">Security (Coming in Phase 4)</div>} />
-                    <Route path="settings" element={<div className="p-8">Settings (Coming Soon)</div>} />
+                    <Route path="notifications" element={<Notifications />} />
+                    <Route path="security" element={<Security />} />
+                    <Route path="settings" element={<Settings />} />
                   </Route>
                   <Route
                     path="/cart"
@@ -180,6 +186,7 @@ function App() {
                 </Suspense>
               </main>
               <Footer />
+              <CompareBar />
               <ToastContainer position="bottom-right" autoClose={4000} hideProgressBar={true} />
             </div>
           </Router>

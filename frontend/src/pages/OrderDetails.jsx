@@ -100,7 +100,7 @@ const OrderDetails = () => {
   const handleDownloadInvoice = async () => {
     try {
       toast.info('Downloading invoice...', { autoClose: 2000 });
-      const blob = await orderService.downloadInvoice(id);
+      const blob = await orderService.downloadInvoice(id, accessToken);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -127,13 +127,13 @@ const OrderDetails = () => {
     switch (status?.toLowerCase()) {
       case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'confirmed': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'packed': return 'bg-indigo-100 text-indigo-800 border-indigo-200';
-      case 'shipped': return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'out for delivery': return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'packed': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'shipped': return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+      case 'out for delivery': return 'bg-cyan-100 text-cyan-800 border-cyan-200';
       case 'delivered': return 'bg-green-100 text-green-800 border-green-200';
       case 'cancelled': return 'bg-red-100 text-red-800 border-red-200';
-      case 'returned': return 'bg-gray-100 text-gray-800 border-gray-200';
-      case 'refunded': return 'bg-teal-100 text-teal-800 border-teal-200';
+      case 'returned': return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'refunded': return 'bg-gray-100 text-gray-800 border-gray-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
@@ -159,6 +159,28 @@ const OrderDetails = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Order Details */}
         <div className="lg:col-span-2 space-y-6">
+          
+          {/* Retry Payment Banner */}
+          {currentOrder.paymentStatus === 'Pending' && currentOrder.paymentMethod !== 'cod' && !isCancelled && (
+            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <span className="text-yellow-600 text-xl mr-3">⚠</span>
+                  <div>
+                    <h3 className="text-yellow-800 font-bold">Payment Pending</h3>
+                    <p className="text-sm text-yellow-700 mt-1">Please complete your payment to process this order.</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleRetryPayment}
+                  className="px-6 py-2 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold rounded-lg shadow-sm transition-colors whitespace-nowrap"
+                >
+                  Retry Payment
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Header */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
@@ -169,6 +191,14 @@ const OrderDetails = () => {
                 </p>
               </div>
               <div className="mt-4 sm:mt-0 flex space-x-3">
+                {shouldShowTimeline && (currentOrder.orderStatus === 'Pending' || currentOrder.orderStatus === 'Confirmed') && (
+                  <button
+                    onClick={handleCancelOrder}
+                    className="px-4 py-2 bg-white border border-red-300 rounded-lg shadow-sm text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    Cancel Order
+                  </button>
+                )}
                 <button
                   onClick={handleDownloadInvoice}
                   className="px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
