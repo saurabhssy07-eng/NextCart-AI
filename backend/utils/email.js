@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import config from '../config/env.js';
+import * as templates from './emailTemplates.js';
 
 class Email {
   constructor(user, url) {
@@ -74,6 +75,68 @@ class Email {
       'Verify your email address (valid for 24 hours)',
       'Please click the link to verify your email address.'
     );
+  }
+  async sendHTML(subject, htmlContent) {
+    const mailOptions = {
+      from: this.from,
+      to: this.to,
+      subject,
+      html: htmlContent,
+    };
+
+    console.log(`\n======================================================`);
+    console.log(`🔔 DEVELOPMENT MODE: HTML Email intercepted`);
+    console.log(`To: ${this.to}`);
+    console.log(`Subject: ${subject}`);
+    console.log(`======================================================\n`);
+
+    try {
+      const transporter = this.newTransport();
+      const info = await transporter.sendMail(mailOptions);
+      console.log(`✉️ Ethereal Email Preview: ${nodemailer.getTestMessageUrl(info)}`);
+    } catch (error) {
+      console.log(`⚠️ Note: Could not send via Ethereal (Auth failed).`);
+    }
+  }
+
+  async sendOrderConfirmation(order, estimatedDelivery) {
+    const html = templates.orderConfirmationTemplate(order, this, estimatedDelivery);
+    await this.sendHTML(`Order Confirmation - ${order.orderNumber}`, html);
+  }
+
+  async sendPaymentSuccess(order, estimatedDelivery) {
+    const html = templates.paymentSuccessTemplate(order, this, estimatedDelivery);
+    await this.sendHTML(`Payment Successful - ${order.orderNumber}`, html);
+  }
+
+  async sendOrderStatusUpdate(order) {
+    let html = '';
+    let subject = '';
+    switch (order.orderStatus) {
+      case 'Packed':
+        html = templates.packedTemplate(order, this);
+        subject = `Order Packed - ${order.orderNumber}`;
+        break;
+      case 'Shipped':
+        html = templates.shippedTemplate(order, this);
+        subject = `Order Shipped - ${order.orderNumber}`;
+        break;
+      case 'Delivered':
+        html = templates.deliveredTemplate(order, this);
+        subject = `Order Delivered - ${order.orderNumber}`;
+        break;
+      case 'Cancelled':
+        html = templates.cancelledTemplate(order, this);
+        subject = `Order Cancelled - ${order.orderNumber}`;
+        break;
+      case 'Refunded':
+        html = templates.refundedTemplate(order, this);
+        subject = `Refund Initiated - ${order.orderNumber}`;
+        break;
+      default:
+        return;
+    }
+    await this.sendHTML(subject, html);
   }
 }
 

@@ -1,5 +1,7 @@
 import { Order, Cart, Product } from '../models/index.js';
 import paymentService from '../services/paymentService.js';
+import Email from '../utils/email.js';
+import { generateInvoice } from '../utils/invoiceGenerator.js';
 
 // CREATE order from cart
 export const createOrder = async (req, res) => {
@@ -65,7 +67,19 @@ export const createOrder = async (req, res) => {
       },
       couponCode: cart.couponCode,
       couponDiscount: cart.couponDiscount,
+      timeline: [
+        {
+          status: 'Pending',
+          title: 'Order Received',
+          description: 'We have received your order.',
+          actor: 'Customer',
+        }
+      ]
     });
+
+    const count = await Order.countDocuments();
+    order.invoiceNumber = `INV-${new Date().getFullYear()}-${String(count + 1).padStart(6, '0')}`;
+    order.invoiceGeneratedAt = new Date();
 
     await order.save();
 
@@ -97,6 +111,17 @@ export const createOrder = async (req, res) => {
     let razorpayOrder = null;
     if (paymentMethod !== 'cod') {
       razorpayOrder = await paymentService.createRazorpayOrder(order.orderSummary.total, order.orderNumber);
+    } else {
+      order.orderStatus = 'Confirmed';
+      order.timeline.push({
+        status: 'Confirmed',
+        title: 'Order Confirmed',
+        description: 'Your COD order is confirmed.',
+        actor: 'System',
+      });
+      await order.save();
+      const estDeliveryDate = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+      await new Email(req.user).sendOrderConfirmation(order, estDeliveryDate);
     }
 
     res.status(201).json({
@@ -203,6 +228,28 @@ export const updateOrderStatus = async (req, res) => {
       });
     }
 
+    // Push to timeline if status changed
+    if (orderStatus && orderStatus !== order.orderStatus) {
+      const statusTitles = {
+        'Packed': 'Order Packed',
+        'Shipped': 'Order Shipped',
+        'Out For Delivery': 'Out For Delivery',
+        'Delivered': 'Order Delivered',
+        'Returned': 'Order Returned'
+      };
+      
+      order.timeline.push({
+        status: orderStatus,
+        title: statusTitles[orderStatus] || orderStatus,
+        description: `Order has been marked as ${orderStatus}.`,
+        actor: 'Admin'
+      });
+      await order.save();
+      
+      await order.populate('user', 'firstName lastName email');
+      await new Email(order.user).sendOrderStatusUpdate(order);
+    }
+
     res.status(200).json({
       success: true,
       message: 'Order updated successfully',
@@ -261,7 +308,16 @@ export const cancelOrder = async (req, res) => {
     }
 
     order.orderStatus = 'Cancelled';
+    order.timeline.push({
+      status: 'Cancelled',
+      title: 'Order Cancelled',
+      description: 'Order was cancelled by the customer.',
+      actor: 'Customer'
+    });
     await order.save();
+
+    await order.populate('user', 'firstName lastName email');
+    await new Email(order.user).sendOrderStatusUpdate(order);
 
     res.status(200).json({
       success: true,
@@ -315,5 +371,30 @@ export const getAllOrders = async (req, res) => {
       message: 'Error fetching orders',
       error: error.message,
     });
+  }
+};
+
+// DOWNLOAD Invoice
+export const downloadInvoice = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id)
+      .populate('user', 'firstName lastName email phone')
+      .populate('items.product', 'name price');
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    // Verify user is the owner (or could add admin check if admin role exists)
+    if (order.user._id.toString() !== req.user.id) {
+      return res.status(403).json({ success: false, message: 'Unauthorized to download this invoice' });
+    }
+
+    // Generate and stream PDF directly to response
+    generateInvoice(order, res);
+
+  } catch (error) {
+    console.error('❌ Download invoice error:', error.message);
+    res.status(500).json({ success: false, message: 'Error generating invoice' });
   }
 };

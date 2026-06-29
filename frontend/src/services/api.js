@@ -268,6 +268,19 @@ export const orderService = {
       body: JSON.stringify(statusData),
     });
   },
+
+  downloadInvoice: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/orders/${id}/invoice`, {
+      method: 'GET',
+      credentials: 'include'
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to download invoice');
+    }
+    
+    return await response.blob();
+  },
 };
 
 // ============= REVIEW SERVICES =============

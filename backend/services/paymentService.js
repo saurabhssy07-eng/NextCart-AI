@@ -1,5 +1,6 @@
 import { razorpay, verifyRazorpaySignature } from '../utils/razorpay.js';
 import { Order } from '../models/index.js';
+import Email from '../utils/email.js';
 
 class PaymentService {
   async createRazorpayOrder(amount, receipt) {
@@ -37,8 +38,19 @@ class PaymentService {
       razorpaySignature,
       paidAt: new Date(),
     };
+    order.timeline.push({
+      status: 'Confirmed',
+      title: 'Payment Successful',
+      description: 'Payment was successfully received via Razorpay.',
+      actor: 'System'
+    });
 
     await order.save();
+    
+    await order.populate('user', 'firstName lastName email');
+    const estDeliveryDate = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    await new Email(order.user).sendPaymentSuccess(order, estDeliveryDate);
+    
     return order;
   }
 }

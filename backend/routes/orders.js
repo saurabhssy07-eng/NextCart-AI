@@ -6,6 +6,7 @@ import {
   updateOrderStatus,
   cancelOrder,
   getAllOrders,
+  downloadInvoice,
 } from '../controllers/orderController.js';
 import { protect, restrictTo } from '../middleware/auth.js';
 
@@ -18,6 +19,7 @@ router.use(protect);
 router.post('/', createOrder);
 router.get('/', getUserOrders);
 router.get('/:id', getOrderById);
+router.get('/:id/invoice', downloadInvoice);
 router.put('/:id/cancel', cancelOrder);
 
 // Admin routes

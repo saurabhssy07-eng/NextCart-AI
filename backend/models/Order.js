@@ -11,6 +11,17 @@ const orderSchema = new mongoose.Schema(
       type: String,
       unique: true,
     },
+    invoiceNumber: String,
+    invoiceGeneratedAt: Date,
+    timeline: [
+      {
+        status: String,
+        title: String,
+        description: String,
+        createdAt: { type: Date, default: Date.now },
+        actor: { type: String, default: 'System' },
+      }
+    ],
     items: [
       {
         product: {
@@ -103,7 +114,10 @@ const orderSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    courier: String,
+    awbNumber: String,
     notes: String,
+    adminNotes: String,
     couponCode: String,
     couponDiscount: {
       type: Number,

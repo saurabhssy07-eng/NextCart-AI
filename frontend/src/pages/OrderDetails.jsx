@@ -97,6 +97,24 @@ const OrderDetails = () => {
     }
   };
 
+  const handleDownloadInvoice = async () => {
+    try {
+      toast.info('Downloading invoice...', { autoClose: 2000 });
+      const blob = await orderService.downloadInvoice(id);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Invoice-${currentOrder.invoiceNumber || currentOrder.orderNumber}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success('Invoice downloaded successfully');
+    } catch (error) {
+      toast.error('Failed to download invoice');
+    }
+  };
+
   if (isLoading) {
     return <div className="container mx-auto px-4 py-12 text-center">Loading...</div>;
   }
@@ -143,12 +161,49 @@ const OrderDetails = () => {
         <div className="lg:col-span-2 space-y-6">
           {/* Header */}
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h1 className="text-2xl font-bold mb-2">Order {currentOrder.orderNumber}</h1>
-            <p className="text-gray-600 mb-6">
-              Placed on {new Date(currentOrder.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
-            </p>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+              <div>
+                <h1 className="text-2xl font-bold mb-2">Order {currentOrder.orderNumber}</h1>
+                <p className="text-gray-600">
+                  Placed on {new Date(currentOrder.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </p>
+              </div>
+              <div className="mt-4 sm:mt-0 flex space-x-3">
+                <button
+                  onClick={handleDownloadInvoice}
+                  className="px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Download Invoice
+                </button>
+              </div>
+            </div>
             
-            {shouldShowTimeline ? (
+            {currentOrder.timeline && currentOrder.timeline.length > 0 ? (
+              <div className="mt-8 mb-4 border-t pt-6">
+                <h3 className="font-bold mb-4 text-lg">Order Timeline</h3>
+                <div className="space-y-4">
+                  {currentOrder.timeline.map((event, index) => (
+                    <div key={index} className="flex">
+                      <div className="flex flex-col items-center mr-4">
+                        <div className="w-3 h-3 bg-primary-500 rounded-full mt-1.5 ring-4 ring-primary-50"></div>
+                        {index !== currentOrder.timeline.length - 1 && (
+                          <div className="w-0.5 h-full bg-gray-200 my-1"></div>
+                        )}
+                      </div>
+                      <div className="pb-4">
+                        <p className="font-medium text-gray-900">{event.title}</p>
+                        <p className="text-sm text-gray-600 mt-1">{event.description}</p>
+                        <p className="text-xs text-gray-400 mt-1.5">
+                          {new Date(event.createdAt).toLocaleString('en-IN', {
+                            day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : shouldShowTimeline ? (
               <div className="mt-8 mb-4">
                 <div className="relative">
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 rounded-full"></div>
@@ -181,8 +236,8 @@ const OrderDetails = () => {
                 </div>
               </div>
             ) : (
-              <div className="mt-4">
-                <span className={`px-4 py-2 rounded border font-medium ${getStatusColor(currentOrder.orderStatus)}`}>
+              <div className="mt-4 border-t pt-4">
+                <span className={`px-4 py-2 rounded border font-medium inline-block mt-2 ${getStatusColor(currentOrder.orderStatus)}`}>
                   {currentOrder.orderStatus}
                 </span>
               </div>
