@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./screenshots/landing_page.png" alt="NextCart AI Cover" width="100%" />
+  <img src="https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/landing_page.png" alt="NextCart AI Cover" width="100%" />
 
   <h1>🛒 NextCart AI</h1>
   <p><strong>A Production-Grade, AI-Powered Full-Stack E-Commerce Platform</strong></p>
@@ -28,17 +28,17 @@ Designed specifically as a flagship portfolio project, NextCart AI demonstrates 
 ## 📸 Application Screenshots
 
 <div align="center">
-  <img src="./screenshots/landing_page.png" width="48%" alt="Landing Page" />
-  <img src="./screenshots/products.png" width="48%" alt="Products View" />
+  <img src="https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/landing_page.png" width="48%" alt="Landing Page" />
+  <img src="https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/products.png" width="48%" alt="Products View" />
   <br/><br/>
-  <img src="./screenshots/ai_assistant.png" width="48%" alt="AI Assistant" />
-  <img src="./screenshots/order.png" width="48%" alt="Order Checkout" />
+  <img src="https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/ai_assistant.png" width="48%" alt="AI Assistant" />
+  <img src="https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/order.png" width="48%" alt="Order Checkout" />
   <br/><br/>
-  <img src="./screenshots/profiledashboard.png" width="48%" alt="Profile Dashboard" />
-  <img src="./screenshots/security_setting.png" width="48%" alt="Security Settings" />
+  <img src="https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/profiledashboard.png" width="48%" alt="Profile Dashboard" />
+  <img src="https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/security_setting.png" width="48%" alt="Security Settings" />
   <br/><br/>
-  <img src="./screenshots/featured_brands.png" width="48%" alt="Featured Brands" />
-  <img src="./screenshots/signuppage.png" width="48%" alt="Signup Page" />
+  <img src="https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/featured_brands.png" width="48%" alt="Featured Brands" />
+  <img src="https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/signuppage.png" width="48%" alt="Signup Page" />
 </div>
 
 ---
