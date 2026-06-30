@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/landing_page.png" alt="NextCart AI Cover" width="100%" />
+  ![NextCart AI Cover](screenshots/landing_page.png)
 
   <h1>🛒 NextCart AI</h1>
   <p><strong>A Production-Grade, AI-Powered Full-Stack E-Commerce Platform</strong></p>
@@ -27,19 +27,12 @@ Designed specifically as a flagship portfolio project, NextCart AI demonstrates 
 
 ## 📸 Application Screenshots
 
-<div align="center">
-  <img src="https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/landing_page.png" width="48%" alt="Landing Page" />
-  <img src="https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/products.png" width="48%" alt="Products View" />
-  <br/><br/>
-  <img src="https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/ai_assistant.png" width="48%" alt="AI Assistant" />
-  <img src="https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/order.png" width="48%" alt="Order Checkout" />
-  <br/><br/>
-  <img src="https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/profiledashboard.png" width="48%" alt="Profile Dashboard" />
-  <img src="https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/security_setting.png" width="48%" alt="Security Settings" />
-  <br/><br/>
-  <img src="https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/featured_brands.png" width="48%" alt="Featured Brands" />
-  <img src="https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/signuppage.png" width="48%" alt="Signup Page" />
-</div>
+| | |
+|:---:|:---:|
+| ![Landing Page](screenshots/landing_page.png) | ![Products View](screenshots/products.png) |
+| ![AI Assistant](screenshots/ai_assistant.png) | ![Order Checkout](screenshots/order.png) |
+| ![Profile Dashboard](screenshots/profiledashboard.png) | ![Security Settings](screenshots/security_setting.png) |
+| ![Featured Brands](screenshots/featured_brands.png) | ![Signup Page](screenshots/signuppage.png) |
 
 ---
 
