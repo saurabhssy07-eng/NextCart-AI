@@ -1,5 +1,5 @@
 <div align="center">
-  ![NextCart AI Cover](screenshots/landing_page.png)
+  ![NextCart AI Cover](https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/landing_page.png?v=final)
 
   <h1>🛒 NextCart AI</h1>
   <p><strong>A Production-Grade, AI-Powered Full-Stack E-Commerce Platform</strong></p>
@@ -29,10 +29,10 @@ Designed specifically as a flagship portfolio project, NextCart AI demonstrates 
 
 | | |
 |:---:|:---:|
-| ![Landing Page](screenshots/landing_page.png) | ![Products View](screenshots/products.png) |
-| ![AI Assistant](screenshots/ai_assistant.png) | ![Order Checkout](screenshots/order.png) |
-| ![Profile Dashboard](screenshots/profiledashboard.png) | ![Security Settings](screenshots/security_setting.png) |
-| ![Featured Brands](screenshots/featured_brands.png) | ![Signup Page](screenshots/signuppage.png) |
+| ![Landing Page](https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/landing_page.png?v=final) | ![Products View](https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/products.png?v=final) |
+| ![AI Assistant](https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/ai_assistant.png?v=final) | ![Order Checkout](https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/order.png?v=final) |
+| ![Profile Dashboard](https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/profiledashboard.png?v=final) | ![Security Settings](https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/security_setting.png?v=final) |
+| ![Featured Brands](https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/featured_brands.png?v=final) | ![Signup Page](https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/signuppage.png?v=final) |
 
 ---
 
