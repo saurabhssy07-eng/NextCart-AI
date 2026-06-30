@@ -311,3 +311,65 @@ export const getWishlist = async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to fetch wishlist', error: error.message });
   }
 };
+
+// -----------------------------------------
+// NOTIFICATIONS MANAGEMENT
+// -----------------------------------------
+
+// @desc    Get user notifications
+// @route   GET /api/users/notifications
+// @access  Private
+export const getNotifications = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    
+    // Seed dummy notification if empty
+    if (!user.notificationsList || user.notificationsList.length === 0) {
+      user.notificationsList = [
+        {
+          title: 'Welcome to NextCart AI!',
+          message: 'Explore our latest AI-powered shopping features and personalized recommendations.',
+          isRead: false,
+          createdAt: Date.now()
+        },
+        {
+          title: 'Security Alert',
+          message: 'A new login was detected on your account. Please review your active sessions.',
+          isRead: false,
+          createdAt: Date.now() - 86400000
+        }
+      ];
+      await user.save({ validateBeforeSave: false });
+    }
+
+    res.status(200).json({
+      success: true,
+      notifications: user.notificationsList.sort((a, b) => b.createdAt - a.createdAt)
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to fetch notifications', error: error.message });
+  }
+};
+
+// @desc    Mark notification as read
+// @route   PATCH /api/users/notifications/:id/read
+// @access  Private
+export const markNotificationRead = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    const notification = user.notificationsList.id(req.params.id);
+
+    if (notification) {
+      notification.isRead = true;
+      await user.save({ validateBeforeSave: false });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Notification marked as read',
+      notifications: user.notificationsList.sort((a, b) => b.createdAt - a.createdAt)
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to mark notification', error: error.message });
+  }
+};

@@ -11,6 +11,7 @@ import orderRoutes from './routes/orders.js';
 import userRoutes from './routes/users.js';
 import reviewRoutes from './routes/reviews.js';
 import paymentRoutes from './routes/paymentRoutes.js';
+import aiRoutes from './routes/aiRoutes.js';
 
 const app = express();
 const startTime = Date.now();
@@ -66,6 +67,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/ai', aiRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({

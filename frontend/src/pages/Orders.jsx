@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { Package } from 'lucide-react';
 import { setOrders, setLoading } from '../store/orderSlice';
 import { orderService } from '../services/api';
+import { useCurrency } from '../context/CurrencyContext';
 import EmptyState from '../components/ui/EmptyState';
 import Badge from '../components/ui/Badge';
 import SectionHeader from '../components/ui/SectionHeader';
@@ -15,6 +16,7 @@ const Orders = () => {
   const dispatch = useDispatch();
   const { orders, isLoading } = useSelector((state) => state.orders);
   const { accessToken } = useSelector((state) => state.auth);
+  const { formatPrice } = useCurrency();
 
   useEffect(() => {
     loadOrders();
@@ -86,7 +88,20 @@ const Orders = () => {
                   </div>
                   
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                    ₹{order.orderSummary.total.toLocaleString('en-IN')}
+                    {formatPrice(order.orderSummary.total)}
+                  </div>
+
+                  <div className="flex items-center gap-2 my-3">
+                    {order.items.slice(0, 4).map((item, index) => (
+                      <div key={index} className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 overflow-hidden border dark:border-gray-600">
+                        <img src={item.product?.image} alt={item.product?.name} className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                    {order.items.length > 4 && (
+                      <div className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center border dark:border-gray-600 text-sm text-gray-500 dark:text-gray-400 font-medium">
+                        +{order.items.length - 4}
+                      </div>
+                    )}
                   </div>
                   
                   <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">

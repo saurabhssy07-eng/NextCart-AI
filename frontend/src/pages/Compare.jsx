@@ -7,11 +7,13 @@ import { cartService } from '../services/api';
 import { toast } from 'react-toastify';
 import EmptyState from '../components/ui/EmptyState';
 import OptimizedImage from '../components/ui/OptimizedImage';
+import { useCurrency } from '../context/CurrencyContext';
 
 const Compare = () => {
   const { items } = useSelector((state) => state.compare);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { formatPrice } = useCurrency();
 
   const handleAddToCart = async (product) => {
     try {
@@ -83,7 +85,7 @@ const Compare = () => {
                       className="w-32 h-32 object-contain mb-4 bg-white rounded-lg mix-blend-multiply dark:mix-blend-normal" 
                     />
                     <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-2 line-clamp-2">{item.name}</h3>
-                    <p className="text-xl font-bold text-blue-600 dark:text-blue-400 mb-4">₹{item.price?.toLocaleString('en-IN')}</p>
+                    <p className="text-xl font-bold text-blue-600 dark:text-blue-400 mb-4">{formatPrice(item.price)}</p>
                     <button 
                       onClick={() => handleAddToCart(item)}
                       className="w-full py-2 bg-gray-900 hover:bg-black dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-lg flex items-center justify-center gap-2 transition-colors font-medium"

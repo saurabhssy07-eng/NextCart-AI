@@ -4,5 +4,7 @@ import Product from './Product.js';
 import Cart from './Cart.js';
 import Order from './Order.js';
 import Review from './Review.js';
+import Conversation from './Conversation.js';
+import AIAnalytics from './AIAnalytics.js';
 
-export { User, Category, Product, Cart, Order, Review };
+export { User, Category, Product, Cart, Order, Review, Conversation, AIAnalytics };

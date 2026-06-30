@@ -32,6 +32,14 @@ export const protect = async (req, res, next) => {
       });
     }
 
+    // Verify token version (if logout-all was triggered, tokenVersion increases)
+    if (decoded.tokenVersion !== undefined && decoded.tokenVersion !== currentUser.tokenVersion) {
+      return res.status(401).json({
+        success: false,
+        message: 'Your session has been invalidated. Please log in again.',
+      });
+    }
+
     // GRANT ACCESS TO PROTECTED ROUTE
     req.user = currentUser;
     next();
@@ -60,3 +68,28 @@ export const restrictTo = (...roles) => {
     next();
   };
 };
+
+export const optionalProtect = async (req, res, next) => {
+  try {
+    let token;
+    if (req.cookies && req.cookies.accessToken) {
+      token = req.cookies.accessToken;
+    } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+
+    if (!token) {
+      return next();
+    }
+
+    const decoded = jwt.verify(token, config.jwtSecret);
+    const currentUser = await User.findById(decoded.id);
+    if (currentUser) {
+      req.user = currentUser;
+    }
+  } catch (error) {
+    // Fail silently and treat as guest
+  }
+  next();
+};
+

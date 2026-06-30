@@ -8,6 +8,8 @@ import Tooltip from '../ui/Tooltip';
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { toggleCompare } from '../../store/compareSlice';
+import { useCurrency } from '../../context/CurrencyContext';
+import QuickViewModal from './QuickViewModal';
 
 const colorMap = {
   black: '#000000',
@@ -40,7 +42,9 @@ const ProductCard = ({
   onCompare,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const { user } = useSelector((state) => state.auth);
+  const { formatPrice } = useCurrency();
   
   // Handle case where wishlist is populated (array of objects) or not (array of strings)
   const isWishlisted = user?.wishlist?.some(item => 
@@ -57,7 +61,11 @@ const ProductCard = ({
   const discountPercent = hasDiscount ? Math.round(((price - discountPrice) / price) * 100) : 0;
   
   const isNew = new Date(product.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // 7 days
-  const isOutOfStock = product.stock <= 0;
+  
+  // Calculate total variant stock if applicable
+  const totalVariantStock = product.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
+  const effectiveStock = product.hasVariants ? totalVariantStock : (product.stock ?? 0);
+  const isOutOfStock = effectiveStock <= 0;
 
   // Extract unique colors from variants
   let availableColors = [];
@@ -104,9 +112,9 @@ const ProductCard = ({
           {isNew && <Badge variant="success">New</Badge>}
         </div>
 
-        {/* Wishlist Button (Mobile Only) */}
+        {/* Wishlist Button (Always show if compact, else mobile only) */}
         {showWishlist && (
-          <div className="md:hidden">
+          <div className={compact ? "block" : "md:hidden"}>
             <Tooltip content={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"} position="left">
                 <motion.button
                   whileTap={{ scale: 0.85 }}
@@ -130,7 +138,7 @@ const ProductCard = ({
         {/* Quick Actions Overlay (Desktop only) */}
         {!compact && (
           <AnimatePresence>
-            {isHovered && !isOutOfStock && (
+            {isHovered && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -145,7 +153,7 @@ const ProductCard = ({
                     onClick={(e) => {
                       e.preventDefault();
                       if (onQuickView) onQuickView(product);
-                      else toast.info('Quick View coming in Phase 5.8!');
+                      else setIsQuickViewOpen(true);
                     }}
                   >
                     <Eye className="w-4 h-4 mr-2" /> Quick View
@@ -257,11 +265,11 @@ const ProductCard = ({
         <div className={`${compact ? 'mt-auto' : 'mt-auto pt-2'}`}>
           <div className="flex items-end gap-2">
             <span className="text-lg font-bold text-gray-900 dark:text-white">
-              ₹{(hasDiscount ? discountPrice : price).toLocaleString('en-IN')}
+              {formatPrice(hasDiscount ? discountPrice : price)}
             </span>
             {hasDiscount && (
               <span className="text-sm text-gray-500 line-through mb-0.5">
-                ₹{price.toLocaleString('en-IN')}
+                {formatPrice(price)}
               </span>
             )}
           </div>
@@ -279,6 +287,15 @@ const ProductCard = ({
           </Button>
         )}
       </div>
+
+      {/* Quick View Modal */}
+      {isQuickViewOpen && (
+        <QuickViewModal 
+          isOpen={isQuickViewOpen} 
+          onClose={() => setIsQuickViewOpen(false)} 
+          product={product} 
+        />
+      )}
     </motion.div>
   );
 };

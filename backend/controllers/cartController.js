@@ -95,7 +95,7 @@ export const addToCart = async (req, res) => {
     );
 
     // Check quantity limits
-    const maxOrderQty = product.maxOrderQuantity || 5;
+    const maxOrderQty = 3;
     let totalQty = quantity;
     
     if (existingItem) {
@@ -158,6 +158,13 @@ export const updateCartItem = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'Quantity must be at least 1',
+      });
+    }
+
+    if (quantity > 3) {
+      return res.status(400).json({
+        success: false,
+        message: 'Maximum 3 items allowed per order for this product',
       });
     }
 

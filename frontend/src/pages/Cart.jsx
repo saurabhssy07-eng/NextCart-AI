@@ -6,6 +6,7 @@ import { setCart, removeItem, updateItemQuantity, clearCart, setLoading } from '
 import { cartService } from '../services/api';
 import EmptyState from '../components/ui/EmptyState';
 import { ShoppingCart } from 'lucide-react';
+import { useCurrency } from '../context/CurrencyContext';
 import { CartSkeleton } from '../components/ui/LoadingSkeleton';
 
 const Cart = () => {
@@ -13,6 +14,7 @@ const Cart = () => {
   const navigate = useNavigate();
   const { items, totalPrice, totalDiscount, finalPrice, isLoading } = useSelector((state) => state.cart);
   const { accessToken } = useSelector((state) => state.auth);
+  const { formatPrice } = useCurrency();
 
   useEffect(() => {
     loadCart();
@@ -35,6 +37,10 @@ const Cart = () => {
   const handleUpdateQuantity = async (productId, variantId, newQuantity) => {
     if (newQuantity < 1) {
       handleRemoveItem(productId, variantId);
+      return;
+    }
+    if (newQuantity > 3) {
+      toast.warning('Maximum 3 items allowed per order');
       return;
     }
 
@@ -151,8 +157,15 @@ const Cart = () => {
                       </div>
                       
                       {/* Price */}
-                      <div className="text-lg font-bold text-gray-900 dark:text-white">
-                        ₹{(item.price * item.quantity).toLocaleString('en-IN')}
+                      <div className="flex flex-col items-end">
+                        <div className="text-lg font-bold text-gray-900 dark:text-white">
+                          {formatPrice(item.price * item.quantity)}
+                        </div>
+                        {item.quantity > 1 && (
+                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            {formatPrice(item.price)} each
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -192,19 +205,19 @@ const Cart = () => {
             <h2 className="text-xl font-bold mb-4">Order Summary</h2>
             <div className="space-y-3 mb-6">
               <div className="flex justify-between">
-                <span>Subtotal:</span>
-                <span>₹{totalPrice.toLocaleString('en-IN')}</span>
+                <span>Subtotal ({items.reduce((a, c) => a + c.quantity, 0)} items):</span>
+                <span>{formatPrice(totalPrice)}</span>
               </div>
               {totalDiscount > 0 && (
                 <div className="flex justify-between text-green-600">
                   <span>Discount:</span>
-                  <span>-₹{totalDiscount.toLocaleString('en-IN')}</span>
+                  <span>-{formatPrice(totalDiscount)}</span>
                 </div>
               )}
               <div className="border-t pt-3">
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total:</span>
-                  <span>₹{finalPrice.toLocaleString('en-IN')}</span>
+                  <span>{formatPrice(finalPrice)}</span>
                 </div>
               </div>
             </div>

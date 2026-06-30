@@ -6,6 +6,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import store from './store';
 import { ThemeProvider } from './context/ThemeContext';
+import { CurrencyProvider } from './context/CurrencyContext';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { authService } from './services/api';
 import { setUser, logout } from './store/authSlice';
@@ -20,6 +21,7 @@ import ResetPassword from './pages/ResetPassword';
 import VerifyEmail from './pages/VerifyEmail';
 import NotFound from './pages/NotFound';
 import ActionFeedback from './pages/ActionFeedback';
+import StaticPage from './pages/StaticPage';
 import CompareBar from './components/ui/CompareBar';
 
 // Lazy-loaded Pages
@@ -102,8 +104,9 @@ function App() {
       <ErrorBoundary>
         <AuthInit>
           <ThemeProvider>
-          <GoogleOAuthProvider clientId={googleClientId}>
-            <Router>
+            <CurrencyProvider>
+              <GoogleOAuthProvider clientId={googleClientId}>
+                <Router>
               <PageTracker />
               <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors">
               <NetworkStatus />
@@ -128,6 +131,14 @@ function App() {
                   <Route path="/deals" element={<Products />} />
                   <Route path="/ai-shopping" element={<AIShopping />} />
                   <Route path="/feedback" element={<ActionFeedback />} />
+                  
+                  {/* Static Info Pages */}
+                  <Route path="/about" element={<StaticPage />} />
+                  <Route path="/contact" element={<StaticPage />} />
+                  <Route path="/privacy" element={<StaticPage />} />
+                  <Route path="/terms" element={<StaticPage />} />
+                  <Route path="/faq" element={<StaticPage />} />
+                  <Route path="/support" element={<StaticPage />} />
 
                   {/* Protected Routes */}
                   <Route
@@ -189,10 +200,11 @@ function App() {
               <CompareBar />
               <ToastContainer position="bottom-right" autoClose={4000} hideProgressBar={true} />
             </div>
-          </Router>
-          </GoogleOAuthProvider>
-        </ThemeProvider>
-      </AuthInit>
+            </Router>
+            </GoogleOAuthProvider>
+            </CurrencyProvider>
+          </ThemeProvider>
+        </AuthInit>
       </ErrorBoundary>
       </HelmetProvider>
     </Provider>

@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
+import { useCurrency } from '../context/CurrencyContext';
 import { setCurrentOrder, setLoading } from '../store/orderSlice';
 import { orderService, paymentService } from '../services/api';
 import { getEstimatedDelivery } from '../utils/dateUtils';
@@ -12,6 +13,7 @@ const OrderDetails = () => {
   const dispatch = useDispatch();
   const { currentOrder, isLoading } = useSelector((state) => state.orders);
   const { accessToken } = useSelector((state) => state.auth);
+  const { formatPrice } = useCurrency();
 
   useEffect(() => {
     loadOrder();
@@ -299,11 +301,16 @@ const OrderDetails = () => {
               <tbody>
                 {currentOrder.items.map((item) => (
                   <tr key={item.product._id} className="border-t">
-                    <td className="px-4 py-2">{item.product.name}</td>
+                    <td className="px-4 py-3 flex items-center gap-3">
+                      <div className="w-12 h-12 rounded bg-gray-100 overflow-hidden shrink-0 border">
+                        <img src={item.product?.image} alt={item.product?.name} className="w-full h-full object-cover" />
+                      </div>
+                      <span className="font-medium text-gray-900">{item.product?.name}</span>
+                    </td>
                     <td className="text-center px-4 py-2">{item.quantity}</td>
-                    <td className="text-right px-4 py-2">₹{item.price.toLocaleString('en-IN')}</td>
+                    <td className="text-right px-4 py-2">{formatPrice(item.price)}</td>
                     <td className="text-right px-4 py-2">
-                      ₹{(item.price * item.quantity).toLocaleString('en-IN')}
+                      {formatPrice(item.price * item.quantity)}
                     </td>
                   </tr>
                 ))}
@@ -336,28 +343,28 @@ const OrderDetails = () => {
             <div className="space-y-3">
               <div className="flex justify-between">
                 <span>Subtotal:</span>
-                <span>₹{currentOrder.orderSummary.subtotal.toLocaleString('en-IN')}</span>
+                <span>{formatPrice(currentOrder.orderSummary.subtotal)}</span>
               </div>
               {currentOrder.orderSummary.discount > 0 && (
                 <div className="flex justify-between text-green-600">
                   <span>Discount:</span>
-                  <span>-₹{currentOrder.orderSummary.discount.toLocaleString('en-IN')}</span>
+                  <span>-{formatPrice(currentOrder.orderSummary.discount)}</span>
                 </div>
               )}
               <div className="flex justify-between">
                 <span>Tax:</span>
-                <span>₹{currentOrder.orderSummary.tax.toLocaleString('en-IN')}</span>
+                <span>{formatPrice(currentOrder.orderSummary.tax)}</span>
               </div>
               {currentOrder.orderSummary.shipping > 0 && (
                 <div className="flex justify-between">
                   <span>Shipping:</span>
-                  <span>₹{currentOrder.orderSummary.shipping.toLocaleString('en-IN')}</span>
+                  <span>{formatPrice(currentOrder.orderSummary.shipping)}</span>
                 </div>
               )}
               <div className="border-t pt-3">
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total:</span>
-                  <span>₹{currentOrder.orderSummary.total.toLocaleString('en-IN')}</span>
+                  <span>{formatPrice(currentOrder.orderSummary.total)}</span>
                 </div>
               </div>
             </div>

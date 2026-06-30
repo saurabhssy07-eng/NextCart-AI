@@ -7,6 +7,7 @@ import { addOrder } from '../store/orderSlice';
 import { orderService, cartService, paymentService } from '../services/api';
 import { getEstimatedDelivery } from '../utils/dateUtils';
 import { Truck } from 'lucide-react';
+import { useCurrency } from '../context/CurrencyContext';
 
 // Indian States list
 const INDIAN_STATES = [
@@ -35,6 +36,7 @@ const Checkout = () => {
   const dispatch = useDispatch();
   const { items, totalPrice, totalDiscount, finalPrice } = useSelector((state) => state.cart);
   const { accessToken, user } = useSelector((state) => state.auth);
+  const { formatPrice } = useCurrency();
   const [isProcessing, setIsProcessing] = useState(false);
   const [formData, setFormData] = useState({
     street: '',
@@ -374,7 +376,7 @@ const Checkout = () => {
                 </span>
               ) : (
                 <span>
-                  {formData.paymentMethod === 'cod' ? '🔒 Place Order' : `💳 Pay ₹${finalPrice.toLocaleString('en-IN')}`}
+                  {formData.paymentMethod === 'cod' ? '🔒 Place Order' : `💳 Pay ${formatPrice(finalPrice)}`}
                 </span>
               )}
             </button>
@@ -413,11 +415,11 @@ const Checkout = () => {
                       {item.product.name}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Qty: {item.quantity}
+                      Qty: {item.quantity} × {formatPrice(item.price)}
                     </p>
                   </div>
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                    ₹{(item.price * item.quantity).toLocaleString('en-IN')}
+                    {formatPrice(item.price * item.quantity)}
                   </p>
                 </div>
               ))}
@@ -426,13 +428,13 @@ const Checkout = () => {
             {/* Price Breakdown */}
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2">
               <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
-                <span>Subtotal ({items.length} items)</span>
-                <span>₹{totalPrice.toLocaleString('en-IN')}</span>
+                <span>Subtotal ({items.reduce((a, c) => a + c.quantity, 0)} items)</span>
+                <span>{formatPrice(totalPrice)}</span>
               </div>
               {totalDiscount > 0 && (
                 <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
                   <span>Discount</span>
-                  <span>-₹{totalDiscount.toLocaleString('en-IN')}</span>
+                  <span>-{formatPrice(totalDiscount)}</span>
                 </div>
               )}
               <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
@@ -446,7 +448,7 @@ const Checkout = () => {
               <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
                 <div className="flex justify-between font-bold text-lg text-gray-900 dark:text-white">
                   <span>Total</span>
-                  <span>₹{finalPrice.toLocaleString('en-IN')}</span>
+                  <span>{formatPrice(finalPrice)}</span>
                 </div>
               </div>
             </div>

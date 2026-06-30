@@ -7,12 +7,13 @@ import { setCurrentProduct, setLoading } from '../store/productSlice';
 import { setCart } from '../store/cartSlice';
 import { productService, cartService, userService } from '../services/api';
 import { setUser } from '../store/authSlice';
+import { useCurrency } from '../context/CurrencyContext';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { ProductCardSkeleton } from '../components/ui/LoadingSkeleton';
 import ProductCard from '../components/product/ProductCard';
 import ReviewSection from '../components/product/ReviewSection';
-import AiReviewSummary from '../components/product/AiReviewSummary';
+import AiShoppingAssistant from '../components/product/AiShoppingAssistant';
 import { getEstimatedDelivery } from '../utils/dateUtils';
 
 const colorMap = {
@@ -37,6 +38,7 @@ const ProductDetails = () => {
   
   const { currentProduct, isLoading } = useSelector((state) => state.products);
   const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const { formatPrice } = useCurrency();
   
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
@@ -187,14 +189,15 @@ const ProductDetails = () => {
     }
   };
 
-  const handleToggleWishlist = async (productId = id) => {
+  const handleToggleWishlist = async (productId) => {
+    const targetId = typeof productId === 'string' ? productId : id;
     if (!isAuthenticated) {
       toast.error('Please login to use wishlist');
       return;
     }
     try {
       // We keep wishlist product-level as requested
-      const res = await userService.toggleWishlist(productId);
+      const res = await userService.toggleWishlist(targetId);
       if (res.success) {
         dispatch(setUser(res.user));
         toast.success(res.message);
@@ -365,11 +368,11 @@ const ProductDetails = () => {
               <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700/50">
                 <div className="flex items-end gap-3 mb-1">
                   <span className="text-4xl font-extrabold text-gray-900 dark:text-white">
-                    ₹{finalPrice.toLocaleString('en-IN')}
+                    {formatPrice(finalPrice)}
                   </span>
                   {hasDiscount && (
                     <span className="text-xl text-gray-500 line-through mb-1">
-                      ₹{displayPrice.toLocaleString('en-IN')}
+                      {formatPrice(displayPrice)}
                     </span>
                   )}
                   {hasDiscount && (
@@ -483,8 +486,8 @@ const ProductDetails = () => {
                   >-</button>
                   <span className="w-12 text-center font-medium text-lg" aria-label="Quantity">{quantity}</span>
                   <button 
-                    onClick={() => setQuantity(Math.min(displayStock, quantity + 1))}
-                    disabled={!canAddToCart}
+                    onClick={() => setQuantity(Math.min(3, displayStock, quantity + 1))}
+                    disabled={!canAddToCart || quantity >= 3}
                     aria-label="Increase quantity"
                     className="px-5 h-full text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-50"
                   >+</button>
@@ -544,7 +547,12 @@ const ProductDetails = () => {
         </div>
 
         {/* AI Summary */}
-        <AiReviewSummary productId={currentProduct._id} productRating={currentProduct.rating || 0} />
+        {/* AI Shopping Assistant Panel */}
+        <AiShoppingAssistant 
+          productId={currentProduct._id} 
+          productRating={currentProduct.rating || 0} 
+          isAuthenticated={isAuthenticated} 
+        />
 
         {/* Tabs for Specs, Reviews */}
         <div className="bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl shadow-sm overflow-hidden mb-12">

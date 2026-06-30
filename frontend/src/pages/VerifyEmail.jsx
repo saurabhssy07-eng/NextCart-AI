@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { authService } from '../services/api';
@@ -7,8 +7,12 @@ const VerifyEmail = () => {
   const { token } = useParams();
   const navigate = useNavigate();
   const [status, setStatus] = useState('verifying');
+  const hasVerified = useRef(false);
 
   useEffect(() => {
+    if (hasVerified.current) return;
+    hasVerified.current = true;
+
     const verify = async () => {
       try {
         const data = await authService.verifyEmail(token);

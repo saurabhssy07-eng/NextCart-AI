@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useCurrency } from '../context/CurrencyContext';
 
 const RecentlyViewed = () => {
   const [viewedProducts, setViewedProducts] = useState([]);
+  const { formatPrice } = useCurrency();
 
   useEffect(() => {
     try {
@@ -41,11 +43,11 @@ const RecentlyViewed = () => {
               </h3>
               <div className="flex items-center gap-2">
                 <span className="font-bold text-gray-900 dark:text-white">
-                  ₹{(product.discountPrice || product.price).toLocaleString('en-IN')}
+                  {formatPrice(product.discountPrice || product.price)}
                 </span>
                 {product.discountPrice && product.discountPrice < product.price && (
                   <span className="text-xs text-gray-400 line-through">
-                    ₹{product.price.toLocaleString('en-IN')}
+                    {formatPrice(product.price)}
                   </span>
                 )}
               </div>

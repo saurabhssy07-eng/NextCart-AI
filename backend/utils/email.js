@@ -11,25 +11,14 @@ class Email {
   }
 
   newTransport() {
-    if (config.nodeEnv === 'production') {
-      // Setup Resend or SendGrid here later
-      return nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        auth: {
-            user: process.env.ETHEREAL_USER || 'hildegard.gulgowski97@ethereal.email',
-            pass: process.env.ETHEREAL_PASS || 'd1H1u5TqN8mH9j7wQW'
-        }
-      });
-    }
-
     return nodemailer.createTransport({
-      host: 'smtp.ethereal.email',
-      port: 587,
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      secure: process.env.SMTP_PORT === '465', // true for 465, false for other ports
       auth: {
-        user: process.env.ETHEREAL_USER || 'hildegard.gulgowski97@ethereal.email',
-        pass: process.env.ETHEREAL_PASS || 'd1H1u5TqN8mH9j7wQW'
-      },
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+      }
     });
   }
 
@@ -41,19 +30,13 @@ class Email {
       text: text + `\n\nLink: ${this.url}`,
     };
 
-    console.log(`\n======================================================`);
-    console.log(`🔔 DEVELOPMENT MODE: Email sending bypassed/intercepted`);
-    console.log(`To: ${this.to}`);
-    console.log(`Subject: ${subject}`);
-    console.log(`Action Link: ${this.url}`);
-    console.log(`======================================================\n`);
-
     try {
       const transporter = this.newTransport();
-      const info = await transporter.sendMail(mailOptions);
-      console.log(`✉️ Ethereal Email sent: ${nodemailer.getTestMessageUrl(info)}`);
+      await transporter.sendMail(mailOptions);
+      console.log(`✉️ Email sent successfully to ${this.to}`);
     } catch (error) {
-      console.log(`⚠️ Note: Could not send via Ethereal (Auth failed), but you can use the Action Link above to proceed.`);
+      console.error(`⚠️ Error sending email:`, error.message);
+      throw error;
     }
   }
 
@@ -76,6 +59,7 @@ class Email {
       'Please click the link to verify your email address.'
     );
   }
+  
   async sendHTML(subject, htmlContent) {
     const mailOptions = {
       from: this.from,
@@ -84,18 +68,13 @@ class Email {
       html: htmlContent,
     };
 
-    console.log(`\n======================================================`);
-    console.log(`🔔 DEVELOPMENT MODE: HTML Email intercepted`);
-    console.log(`To: ${this.to}`);
-    console.log(`Subject: ${subject}`);
-    console.log(`======================================================\n`);
-
     try {
       const transporter = this.newTransport();
-      const info = await transporter.sendMail(mailOptions);
-      console.log(`✉️ Ethereal Email Preview: ${nodemailer.getTestMessageUrl(info)}`);
+      await transporter.sendMail(mailOptions);
+      console.log(`✉️ HTML Email sent successfully to ${this.to}`);
     } catch (error) {
-      console.log(`⚠️ Note: Could not send via Ethereal (Auth failed).`);
+      console.error(`⚠️ Error sending HTML email:`, error.message);
+      throw error;
     }
   }
 

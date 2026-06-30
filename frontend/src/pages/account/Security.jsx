@@ -1,14 +1,77 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { Shield, Key, Smartphone, Mail, Globe, LogOut } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { authService } from '../../services/api';
+import { logout } from '../../store/authSlice';
+import { useNavigate } from 'react-router-dom';
+import Modal from '../../components/ui/Modal';
 
 const Security = () => {
   const { user } = useSelector(state => state.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   
-  const handleLogoutAll = () => {
-    toast.info('This feature requires backend support (Coming soon)', { autoClose: 2000 });
+  // 2FA State
+  const [qrCode, setQrCode] = useState(null);
+  const [twoFactorToken, setTwoFactorToken] = useState('');
+  const [show2FAModal, setShow2FAModal] = useState(false);
+  const [isVerifying2FA, setIsVerifying2FA] = useState(false);
+  
+  const handleLogoutAll = async () => {
+    try {
+      await authService.logoutAll();
+      toast.success('Logged out of all devices successfully.');
+      dispatch(logout());
+      navigate('/login');
+    } catch (error) {
+      toast.error('Failed to logout of all devices');
+    }
+  };
+
+  const handleEnable2FA = async () => {
+    try {
+      const res = await authService.generate2FA();
+      if (res.success) {
+        setQrCode(res.qrCodeUrl);
+        setShow2FAModal(true);
+      }
+    } catch (error) {
+      toast.error('Error generating 2FA');
+    }
+  };
+
+  const handleVerify2FA = async (e) => {
+    e.preventDefault();
+    setIsVerifying2FA(true);
+    try {
+      const res = await authService.verify2FA(twoFactorToken);
+      if (res.success) {
+        toast.success('Two-Factor Authentication enabled!');
+        setShow2FAModal(false);
+        // Refresh page to get updated user object or dispatch updated user
+        window.location.reload();
+      } else {
+        toast.error(res.message || 'Invalid code');
+      }
+    } catch (error) {
+      toast.error('Invalid 2FA code');
+    } finally {
+      setIsVerifying2FA(false);
+    }
+  };
+
+  const handleDisable2FA = async () => {
+    try {
+      const res = await authService.disable2FA();
+      if (res.success) {
+        toast.success('Two-Factor Authentication disabled');
+        window.location.reload();
+      }
+    } catch (error) {
+      toast.error('Error disabling 2FA');
+    }
   };
 
   return (
@@ -63,16 +126,24 @@ const Security = () => {
               <div>
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                   Two-Factor Authentication
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-yellow-100 text-yellow-800">COMING SOON</span>
+                  {user?.twoFactorEnabled && (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-800">ENABLED</span>
+                  )}
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   Add an extra layer of security to your account.
                 </p>
               </div>
             </div>
-            <button disabled className="px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-lg cursor-not-allowed">
-              Enable
-            </button>
+            {user?.twoFactorEnabled ? (
+              <button onClick={handleDisable2FA} className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 rounded-lg">
+                Disable
+              </button>
+            ) : (
+              <button onClick={handleEnable2FA} className="px-4 py-2 text-sm font-medium text-purple-600 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-lg">
+                Enable
+              </button>
+            )}
           </div>
         </div>
 
@@ -129,6 +200,41 @@ const Security = () => {
         </div>
 
       </div>
+
+      {/* 2FA Modal */}
+      <Modal isOpen={show2FAModal} onClose={() => setShow2FAModal(false)} title="Setup Two-Factor Authentication">
+        <div className="p-4 space-y-4 text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            Scan this QR code with an authenticator app (e.g., Google Authenticator, Authy).
+          </p>
+          {qrCode && (
+            <div className="flex justify-center bg-white p-2 rounded-lg inline-block mx-auto border dark:border-gray-700">
+              <img src={qrCode} alt="2FA QR Code" className="w-48 h-48" />
+            </div>
+          )}
+          <p className="text-sm text-gray-600 dark:text-gray-300 text-left mt-4">
+            Enter the 6-digit code from your app to verify and enable 2FA:
+          </p>
+          <form onSubmit={handleVerify2FA} className="flex gap-2">
+            <input
+              type="text"
+              required
+              maxLength="6"
+              placeholder="123456"
+              value={twoFactorToken}
+              onChange={(e) => setTwoFactorToken(e.target.value)}
+              className="flex-1 px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white text-center tracking-widest text-lg font-mono"
+            />
+            <button
+              type="submit"
+              disabled={isVerifying2FA || twoFactorToken.length < 6}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50"
+            >
+              Verify
+            </button>
+          </form>
+        </div>
+      </Modal>
     </div>
   );
 };

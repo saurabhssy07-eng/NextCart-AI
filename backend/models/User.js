@@ -94,7 +94,20 @@ const userSchema = new mongoose.Schema(
       type: Date,
       select: false,
     },
-    // Session tracking prep
+    // Two-Factor Authentication
+    twoFactorSecret: {
+      type: String,
+      select: false,
+    },
+    twoFactorEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    // Session tracking prep & token version
+    tokenVersion: {
+      type: Number,
+      default: 0,
+    },
     sessions: [
       {
         token: String,
@@ -146,6 +159,14 @@ const userSchema = new mongoose.Schema(
         default: 'INR',
       },
     },
+    notificationsList: [
+      {
+        title: String,
+        message: String,
+        isRead: { type: Boolean, default: false },
+        createdAt: { type: Date, default: Date.now }
+      }
+    ],
     notifications: {
       marketing: { type: Boolean, default: true },
       orderUpdates: { type: Boolean, default: true },

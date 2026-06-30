@@ -11,9 +11,12 @@ const Footer = () => {
             <p className="text-gray-400 text-sm leading-relaxed mb-6">
               Your AI-powered e-commerce platform for the best online shopping experience.
             </p>
-            <div className="flex gap-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">GitHub</a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">LinkedIn</a>
+            <div className="flex flex-col gap-2 mt-4">
+              <div className="flex gap-4">
+                <a href="https://github.com/saurabhssy07-eng" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">GitHub</a>
+                <a href="https://www.linkedin.com/in/saurabh-singh-yadav-b23252361" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">LinkedIn</a>
+              </div>
+              <a href="mailto:saurabhssy07@gmail.com" className="text-gray-400 hover:text-white text-xs transition-colors">saurabhssy07@gmail.com</a>
             </div>
           </div>
 
@@ -22,10 +25,10 @@ const Footer = () => {
             <h3 className="text-lg font-bold mb-4">Company</h3>
             <ul className="space-y-2 text-gray-400 text-sm">
               <li><Link to="/products" className="hover:text-white transition-colors">Shop</Link></li>
-              <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Privacy</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Terms</a></li>
+              <li><Link to="/about" className="hover:text-white transition-colors">About</Link></li>
+              <li><Link to="/contact" className="hover:text-white transition-colors">Contact</Link></li>
+              <li><Link to="/privacy" className="hover:text-white transition-colors">Privacy</Link></li>
+              <li><Link to="/terms" className="hover:text-white transition-colors">Terms</Link></li>
             </ul>
           </div>
 
@@ -34,8 +37,8 @@ const Footer = () => {
             <h3 className="text-lg font-bold mb-4">Customer Service</h3>
             <ul className="space-y-2 text-gray-400 text-sm">
               <li><Link to="/orders" className="hover:text-white transition-colors">Returns</Link></li>
-              <li><a href="#" className="hover:text-white transition-colors">FAQs</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Support</a></li>
+              <li><Link to="/faq" className="hover:text-white transition-colors">FAQs</Link></li>
+              <li><Link to="/support" className="hover:text-white transition-colors">Support</Link></li>
             </ul>
           </div>
 

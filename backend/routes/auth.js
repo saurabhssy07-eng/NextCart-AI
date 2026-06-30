@@ -35,6 +35,7 @@ router.post('/login', loginLimiter, loginValidation, authController.login);
 router.post('/logout', authController.logout);
 router.post('/refresh-token', authController.refreshToken);
 router.post('/google-login', authController.googleLogin);
+router.post('/verify-2fa', authController.verify2FALogin);
 
 router.post('/forgot-password', forgotPasswordLimiter, [
   check('email', 'Please include a valid email').isEmail(),
@@ -51,5 +52,9 @@ router.post('/resend-verification', [
 // Protected routes
 router.use(protect);
 router.get('/me', authController.getMe);
+router.post('/logout-all', authController.logoutAll);
+router.post('/2fa/generate', authController.generate2FA);
+router.post('/2fa/verify', authController.verify2FA);
+router.post('/2fa/disable', authController.disable2FA);
 
 export default router;

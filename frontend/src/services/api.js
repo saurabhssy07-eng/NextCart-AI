@@ -82,6 +82,38 @@ export const authService = {
     });
   },
 
+  logoutAll: async () => {
+    return customFetch(`${API_BASE_URL}/auth/logout-all`, {
+      method: 'POST',
+    });
+  },
+
+  generate2FA: async () => {
+    return customFetch(`${API_BASE_URL}/auth/2fa/generate`, {
+      method: 'POST',
+    });
+  },
+
+  verify2FA: async (token) => {
+    return customFetch(`${API_BASE_URL}/auth/2fa/verify`, {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    });
+  },
+
+  disable2FA: async () => {
+    return customFetch(`${API_BASE_URL}/auth/2fa/disable`, {
+      method: 'POST',
+    });
+  },
+
+  verify2FALogin: async (userId, token) => {
+    return customFetch(`${API_BASE_URL}/auth/verify-2fa`, {
+      method: 'POST',
+      body: JSON.stringify({ userId, token }),
+    });
+  },
+
   refreshToken: async () => {
     return customFetch(`${API_BASE_URL}/auth/refresh-token`, {
       method: 'POST',
@@ -425,6 +457,18 @@ export const userService = {
       method: 'GET',
     });
   },
+
+  getNotifications: async () => {
+    return customFetch(`${API_BASE_URL}/users/notifications`, {
+      method: 'GET',
+    });
+  },
+
+  markNotificationRead: async (id) => {
+    return customFetch(`${API_BASE_URL}/users/notifications/${id}/read`, {
+      method: 'PATCH',
+    });
+  },
 };
 
 // ============= PAYMENT SERVICES =============
@@ -442,6 +486,27 @@ export const paymentService = {
   },
 };
 
+// ============= AI SERVICES =============
+export const aiService = {
+  getProductInsights: async (productId) => {
+    return customFetch(`${API_BASE_URL}/ai/product/${productId}/insights`, {
+      method: 'POST',
+    });
+  },
+  askQuestion: async (productId, question) => {
+    return customFetch(`${API_BASE_URL}/ai/product/${productId}/qa`, {
+      method: 'POST',
+      body: JSON.stringify({ question }),
+    });
+  },
+  recommend: async (query, conversationId = null) => {
+    return customFetch(`${API_BASE_URL}/ai/recommend`, {
+      method: 'POST',
+      body: JSON.stringify({ query, conversationId }),
+    });
+  },
+};
+
 export default {
   authService,
   productService,
@@ -451,4 +516,5 @@ export default {
   userService,
   reviewService,
   paymentService,
+  aiService,
 };

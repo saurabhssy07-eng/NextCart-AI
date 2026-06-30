@@ -114,7 +114,7 @@ const Products = () => {
   };
 
   const handleToggleWishlist = async (productId, e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!isAuthenticated) {
       toast.error('Please login to use wishlist');
       return;
@@ -135,18 +135,18 @@ const Products = () => {
     if (isDealsPage) {
       return { title: 'Deals of the Day', subtitle: 'Amazing discounts on top products' };
     }
-    if (filters.sort === '-rating') {
-      return { title: 'Trending Products', subtitle: 'Highly rated by our community' };
-    }
-    if (filters.sort === '-createdAt') {
-      return { title: 'New Arrivals', subtitle: 'The latest additions to our store' };
+    if (filters.search) {
+      return { title: 'Search Results', subtitle: `Showing results for "${filters.search}"` };
     }
     if (filters.category) {
       const cat = categories.find(c => c._id === filters.category);
       if (cat) return { title: cat.name, subtitle: `Explore ${cat.name} products` };
     }
-    if (filters.search) {
-      return { title: 'Search Results', subtitle: `Showing results for "${filters.search}"` };
+    if (filters.sort === '-rating') {
+      return { title: 'Trending Products', subtitle: 'Highly rated by our community' };
+    }
+    if (filters.sort === '-createdAt') {
+      return { title: 'New Arrivals', subtitle: 'The latest additions to our store' };
     }
     return { title: 'All Products', subtitle: 'Explore our complete collection' };
   };
@@ -234,37 +234,52 @@ const Products = () => {
           </div>
 
           {/* Pagination */}
-          {pagination.pages > 1 && (
-            <div className="flex justify-center gap-2 mt-10">
-              <button
-                onClick={() => handleFilterChange('page', filters.page - 1)}
-                disabled={filters.page <= 1}
-                className="px-4 py-2 border rounded text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-gray-900 dark:text-gray-100"
-              >
-                Previous
-              </button>
-              {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((p) => (
+          {pagination.pages > 1 && (() => {
+            const getPageNumbers = () => {
+              const total = pagination.pages;
+              const current = filters.page;
+              if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+              if (current <= 4) return [1, 2, 3, 4, 5, '...', total];
+              if (current >= total - 3) return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
+              return [1, '...', current - 1, current, current + 1, '...', total];
+            };
+
+            return (
+              <div className="flex flex-wrap justify-center items-center gap-2 mt-10">
                 <button
-                  key={p}
-                  onClick={() => handleFilterChange('page', p)}
-                  className={`px-4 py-2 border rounded ${
-                    filters.page === p
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'hover:bg-gray-100'
-                  }`}
+                  onClick={() => handleFilterChange('page', filters.page - 1)}
+                  disabled={filters.page <= 1}
+                  className="px-4 py-2 border rounded text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed border-gray-300 dark:border-gray-600"
                 >
-                  {p}
+                  Previous
                 </button>
-              ))}
-              <button
-                onClick={() => handleFilterChange('page', filters.page + 1)}
-                disabled={filters.page >= pagination.pages}
-                className="px-4 py-2 border rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Next
-              </button>
-            </div>
-          )}
+                {getPageNumbers().map((p, idx) => (
+                  p === '...' ? (
+                    <span key={`ellipsis-${idx}`} className="px-4 py-2 text-gray-500">...</span>
+                  ) : (
+                    <button
+                      key={p}
+                      onClick={() => handleFilterChange('page', p)}
+                      className={`px-4 py-2 border rounded ${
+                        filters.page === p
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600'
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  )
+                ))}
+                <button
+                  onClick={() => handleFilterChange('page', filters.page + 1)}
+                  disabled={filters.page >= pagination.pages}
+                  className="px-4 py-2 border rounded text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed border-gray-300 dark:border-gray-600"
+                >
+                  Next
+                </button>
+              </div>
+            );
+          })()}
         </>
       )}
     </div>

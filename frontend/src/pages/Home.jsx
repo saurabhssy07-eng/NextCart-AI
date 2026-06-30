@@ -134,9 +134,6 @@ const Home = () => {
       <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-primary-900 text-white py-16 md:py-24 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
         <div className="container mx-auto px-4 relative z-10 flex flex-col items-center text-center">
-          <Badge className="bg-primary-500/20 text-primary-200 border-primary-500/30 mb-6 backdrop-blur-sm px-4 py-1 text-sm">
-            Phase 5.1.6 UI Polish Complete
-          </Badge>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 tracking-tight">
             Welcome to <span className="text-primary-400">NextCart AI</span>
           </h1>
@@ -280,24 +277,35 @@ const Home = () => {
         </section>
         
         {/* 5. Featured Brands */}
-        <section className="bg-white dark:bg-gray-800/80 rounded-3xl p-10 border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden">
+        <section className="bg-white dark:bg-gray-900 rounded-3xl py-12 relative overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm">
           <div className="absolute top-0 right-0 p-8 opacity-5">
             <Sparkles className="w-48 h-48" />
           </div>
-          <div className="text-center mb-10 relative z-10">
+          <div className="text-center mb-10 relative z-10 px-4">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Featured Brands</h2>
             <p className="text-gray-500 mt-2">Shop from the best brands in the world</p>
           </div>
-          <div className="flex flex-wrap justify-center items-center gap-10 md:gap-20 opacity-40 grayscale hover:grayscale-0 transition-all duration-500 relative z-10">
-            {['Nike', 'Apple', 'Samsung', 'Sony', 'Adidas', 'Puma'].map((brand, i) => (
-              <div 
-                key={i} 
-                onClick={() => navigate(`/products?search=${brand}`)}
-                className="text-2xl md:text-4xl font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest hover:text-primary-600 transition-colors cursor-pointer hover:scale-110"
-              >
-                {brand}
-              </div>
-            ))}
+          
+          <div className="relative flex overflow-x-hidden group">
+            {/* Gradient Overlays for smooth edges */}
+            <div className="absolute top-0 bottom-0 left-0 w-24 bg-gradient-to-r from-white dark:from-gray-900 to-transparent z-10"></div>
+            <div className="absolute top-0 bottom-0 right-0 w-24 bg-gradient-to-l from-white dark:from-gray-900 to-transparent z-10"></div>
+            
+            <div className="flex animate-marquee group-hover:[animation-play-state:paused] whitespace-nowrap">
+              {[...Array(2)].map((_, arrayIndex) => (
+                <div key={arrayIndex} className="flex items-center gap-10 md:gap-16 px-8">
+                  {['Nike', 'Apple', 'Samsung', 'Sony', 'Adidas', 'Puma', 'Zara', 'H&M', "Levi's", 'Under Armour'].map((brand, i) => (
+                    <div 
+                      key={`${arrayIndex}-${i}`}
+                      onClick={() => navigate(`/products?search=${brand}`)}
+                      className="flex items-center justify-center min-w-[140px] h-20 px-8 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 text-2xl md:text-3xl font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest hover:text-primary-600 dark:hover:text-primary-400 hover:shadow-lg hover:shadow-primary-500/10 transition-all duration-300 cursor-pointer hover:-translate-y-1"
+                    >
+                      {brand}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 

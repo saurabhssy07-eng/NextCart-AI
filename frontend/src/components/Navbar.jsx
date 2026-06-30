@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, ShoppingCart, Heart, Bell, User, Menu, X, 
-  Sparkles, Package, Tag, LogOut 
+  Sparkles, Package, Tag, LogOut, Code, Mail, ExternalLink, Terminal 
 } from 'lucide-react';
 import { logout } from '../store/authSlice';
 import Avatar from './ui/Avatar';
@@ -20,6 +20,7 @@ const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isDevDrawerOpen, setIsDevDrawerOpen] = useState(false);
   const searchInputRef = useRef(null);
 
   const cartItemsCount = items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
@@ -28,6 +29,7 @@ const Navbar = () => {
   useEffect(() => {
     setIsMobileMenuOpen(false);
     setIsProfileDropdownOpen(false);
+    setIsDevDrawerOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -101,7 +103,6 @@ const Navbar = () => {
                 className="w-full pl-11 pr-12 py-2.5 bg-gray-100 dark:bg-gray-800 border-transparent focus:bg-white dark:focus:bg-gray-900 border focus:border-primary-500 rounded-xl outline-none transition-all text-sm text-gray-900 dark:text-gray-100"
               />
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-
             </form>
           </div>
 
@@ -117,8 +118,17 @@ const Navbar = () => {
 
           {/* Right Actions */}
           <div className="flex items-center gap-2 md:gap-4 shrink-0">
-            {/* Mobile Search Toggle could go here if we expand */}
             
+            {/* Developer Connect Hamburger Icon */}
+            <button 
+              onClick={() => setIsDevDrawerOpen(true)}
+              className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm"
+              title="Connect with Developer"
+            >
+              <Code className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              <span className="text-xs font-bold hidden md:inline pr-1">Dev Connect</span>
+            </button>
+
             {isAuthenticated ? (
               <>
                 <Link to="/account/wishlist" className="relative p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors hidden sm:block">
@@ -248,6 +258,16 @@ const Navbar = () => {
                   <Sparkles className="w-5 h-5" /> AI Assistant ✨
                 </Link>
                 
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    setIsDevDrawerOpen(true);
+                  }}
+                  className="flex items-center gap-3 p-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 font-medium text-left w-full"
+                >
+                  <Code className="w-5 h-5 text-purple-500" /> Meet Developer 🚀
+                </button>
+                
                 {navLinks.map((link) => (
                   <Link key={link.name} to={link.path} className="flex items-center gap-3 p-3 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 font-medium">
                     <link.icon className="w-5 h-5 text-gray-400" /> {link.name}
@@ -260,6 +280,218 @@ const Navbar = () => {
                     <Link to="/register" className="w-full py-2.5 text-center font-medium bg-primary-600 text-white rounded-lg">Sign Up</Link>
                   </div>
                 )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Developer Connect Right Slide-Over Drawer */}
+      <AnimatePresence>
+        {isDevDrawerOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsDevDrawerOpen(false)}
+              className="fixed inset-0 bg-black/60 z-50 backdrop-blur-md"
+            />
+            {/* Drawer Panel */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed inset-y-0 right-0 w-full max-w-md bg-white dark:bg-gray-900 shadow-2xl border-l border-gray-200 dark:border-gray-800 z-50 flex flex-col h-full overflow-hidden"
+            >
+              {/* Header */}
+              <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-blue-500/10">
+                <div className="flex items-center gap-2">
+                  <Terminal className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  <span className="font-bold text-gray-900 dark:text-white">Meet the Developer</span>
+                </div>
+                <button 
+                  onClick={() => setIsDevDrawerOpen(false)}
+                  className="p-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors"
+                >
+                  <X className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                </button>
+              </div>
+
+              {/* Body Content */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                
+                {/* Developer Profile card */}
+                <div className="flex flex-col items-center text-center p-6 bg-gray-50 dark:bg-gray-800/40 rounded-2xl border border-gray-100 dark:border-gray-800">
+                  <img 
+                    src="https://avatars.githubusercontent.com/u/221521607?v=4" 
+                    alt="Saurabh Singh Yadav"
+                    className="w-24 h-24 rounded-full border-4 border-purple-500/20 shadow-md mb-4 object-cover"
+                  />
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">SAURABH SINGH YADAV</h3>
+                  <p className="text-xs text-purple-600 dark:text-purple-400 font-semibold mb-2 uppercase tracking-wider">Computer Science Engineer</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 max-w-xs">
+                    Computer Science student (B.Tech) at Saraswati Higher Education and Technical College of Engineering.
+                  </p>
+                </div>
+
+                {/* Social Connect Options */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400">Connect with Me</h4>
+                  <div className="grid grid-cols-1 gap-2.5">
+                    
+                    <a 
+                      href="https://github.com/saurabhssy07-eng" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="flex items-center gap-3 p-3.5 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-purple-50/30 dark:hover:bg-purple-950/10 hover:border-purple-200 transition-all group"
+                    >
+                      <div className="p-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg group-hover:bg-purple-100 dark:group-hover:bg-purple-950/50 group-hover:text-purple-600 transition-colors flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-github"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/></svg>
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-sm font-semibold text-gray-900 dark:text-white">GitHub Profile</div>
+                        <div className="text-xs text-gray-400">saurabhssy07-eng</div>
+                      </div>
+                      <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-purple-500" />
+                    </a>
+
+                    <a 
+                      href="https://www.linkedin.com/in/saurabh-singh-yadav-b23252361" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="flex items-center gap-3 p-3.5 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-purple-50/30 dark:hover:bg-purple-950/10 hover:border-purple-200 transition-all group"
+                    >
+                      <div className="p-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg group-hover:bg-purple-100 dark:group-hover:bg-purple-950/50 group-hover:text-purple-600 transition-colors flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-linkedin"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-sm font-semibold text-gray-900 dark:text-white">LinkedIn Connection</div>
+                        <div className="text-xs text-gray-400">in/saurabh-singh-yadav-b23252361</div>
+                      </div>
+                      <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-purple-500" />
+                    </a>
+
+                    <a 
+                      href="mailto:saurabhssy07@gmail.com" 
+                      className="flex items-center gap-3 p-3.5 border border-gray-100 dark:border-gray-800 rounded-xl hover:bg-purple-50/30 dark:hover:bg-purple-950/10 hover:border-purple-200 transition-all group"
+                    >
+                      <div className="p-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg group-hover:bg-purple-100 dark:group-hover:bg-purple-950/50 group-hover:text-purple-600 transition-colors flex items-center justify-center">
+                        <Mail className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-sm font-semibold text-gray-900 dark:text-white">Direct Email</div>
+                        <div className="text-xs text-gray-400">saurabhssy07@gmail.com</div>
+                      </div>
+                      <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-purple-500" />
+                    </a>
+
+                  </div>
+                </div>
+
+                {/* Projects Section */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400">Other Public Projects</h4>
+                  <div className="space-y-3">
+                    
+                    {/* CarbonWise AI */}
+                    <div className="p-4 border border-gray-100 dark:border-gray-800 rounded-xl bg-gray-50/50 dark:bg-gray-800/20">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-semibold text-sm text-gray-900 dark:text-white">CarbonWise AI</span>
+                        <span className="text-[10px] bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-bold px-2 py-0.5 rounded">Active</span>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3">
+                        CarbonWise AI - Personal carbon footprint tracker powered by React, Firebase and Gemini AI.
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <a 
+                          href="https://github.com/saurabhssy07-eng/CarbonWiseAI" 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/></svg>
+                          Code
+                        </a>
+                        <a 
+                          href="https://carbon-wise-ai-liard.vercel.app" 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-colors"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          Live Demo
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* AuraResume */}
+                    <div className="p-4 border border-gray-100 dark:border-gray-800 rounded-xl bg-gray-50/50 dark:bg-gray-800/20">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-semibold text-sm text-gray-900 dark:text-white">AuraResume</span>
+                        <span className="text-[10px] bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-bold px-2 py-0.5 rounded">Active</span>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3">
+                        Modern ATS-Friendly Resume Builder with Cloud PDF Export powered by Next.js & Puppeteer.
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <a 
+                          href="https://github.com/saurabhssy07-eng/AuraResume" 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/></svg>
+                          Code
+                        </a>
+                        <a 
+                          href="https://auraresume-p31i.onrender.com" 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-colors"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          Live Demo
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* News Detection App */}
+                    <div className="p-4 border border-gray-100 dark:border-gray-800 rounded-xl bg-gray-50/50 dark:bg-gray-800/20">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-semibold text-sm text-gray-900 dark:text-white">News Detection App</span>
+                        <span className="text-[10px] bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-bold px-2 py-0.5 rounded">Active</span>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3">
+                        AI-based fake news detection web application using machine learning models.
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <a 
+                          href="https://github.com/saurabhssy07-eng/News_Detection_App" 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/></svg>
+                          Code
+                        </a>
+                        <a 
+                          href="https://news-detection-app-gsan.onrender.com" 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-colors"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          Live Demo
+                        </a>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
               </div>
             </motion.div>
           </>

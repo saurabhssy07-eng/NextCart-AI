@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import { useCurrency } from '../../context/CurrencyContext';
 import { Moon, Sun, Monitor, Globe, IndianRupee, Mail, Bell, Shield } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 const Settings = () => {
   const { theme, toggleTheme } = useTheme();
+  const { currency, setCurrency } = useCurrency();
   
   const [settings, setSettings] = useState({
-    currency: 'INR',
     language: 'EN',
     orderEmails: true,
     promoEmails: false,
@@ -23,11 +24,16 @@ const Settings = () => {
   };
 
   const handleSelect = (key, value) => {
-    setSettings(prev => ({
-      ...prev,
-      [key]: value
-    }));
-    toast.success('Settings updated successfully', { autoClose: 1000 });
+    if (key === 'currency') {
+      setCurrency(value);
+      toast.success('Currency updated successfully', { autoClose: 1000 });
+    } else {
+      setSettings(prev => ({
+        ...prev,
+        [key]: value
+      }));
+      toast.success('Settings updated successfully', { autoClose: 1000 });
+    }
   };
 
   return (
@@ -91,7 +97,7 @@ const Settings = () => {
                 <p className="text-sm text-gray-500 dark:text-gray-400">Display prices in your local currency.</p>
               </div>
               <select 
-                value={settings.currency}
+                value={currency}
                 onChange={(e) => handleSelect('currency', e.target.value)}
                 className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
               >

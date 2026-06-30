@@ -8,21 +8,55 @@ export const getAllProducts = async (req, res) => {
 
     let filter = { isActive: true };
 
+    let sortQuery = sort || '-createdAt';
+    let projection = null;
+
     if (category) {
       filter.category = category;
     }
 
     if (search && search.trim().length > 0) {
-      filter.name = { $regex: search, $options: 'i' };
+      filter.$text = { $search: search };
+      // Override sort to prioritize text search relevance if the user hasn't explicitly selected another sort like price
+      if (!sort || sort === '-createdAt') {
+        sortQuery = { score: { $meta: 'textScore' } };
+      }
+      projection = { score: { $meta: 'textScore' } };
     }
 
-    const products = await Product.find(filter)
+    let products = await Product.find(filter, projection)
       .populate('category', 'name slug')
-      .sort(sort || '-createdAt')
+      .sort(sortQuery)
       .skip(skip)
       .limit(parseInt(limit));
 
-    const total = await Product.countDocuments(filter);
+    let total = await Product.countDocuments(filter);
+
+    // Fallback: 1-character typo tolerance using regex if no results found
+    if (products.length === 0 && search && search.trim().length > 3) {
+      const term = search.trim();
+      const fuzzyRegexes = [];
+      for (let i = 0; i < term.length; i++) {
+        fuzzyRegexes.push(term.slice(0, i) + '.' + term.slice(i + 1));
+      }
+      const fuzzyPattern = fuzzyRegexes.join('|');
+      
+      const fuzzyFilter = { isActive: true };
+      if (category) fuzzyFilter.category = category;
+      fuzzyFilter.$or = [
+        { name: { $regex: fuzzyPattern, $options: 'i' } },
+        { tags: { $regex: fuzzyPattern, $options: 'i' } },
+        { brand: { $regex: fuzzyPattern, $options: 'i' } }
+      ];
+
+      products = await Product.find(fuzzyFilter)
+        .populate('category', 'name slug')
+        .sort(sort || '-createdAt')
+        .skip(skip)
+        .limit(parseInt(limit));
+      
+      total = await Product.countDocuments(fuzzyFilter);
+    }
 
     res.status(200).json({
       success: true,

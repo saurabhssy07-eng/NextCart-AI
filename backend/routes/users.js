@@ -68,4 +68,11 @@ router.put('/addresses/:id/default', [
 router.post('/wishlist', userController.toggleWishlist);
 router.get('/wishlist', userController.getWishlist);
 
+// ==========================================
+// NOTIFICATIONS ROUTES
+// ==========================================
+
+router.get('/notifications', userController.getNotifications);
+router.patch('/notifications/:id/read', userController.markNotificationRead);
+
 export default router;
