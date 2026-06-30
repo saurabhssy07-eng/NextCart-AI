@@ -21,14 +21,14 @@ const createSendToken = (user, statusCode, res, message) => {
     expires: new Date(Date.now() + 15 * 60 * 1000), // 15m
     httpOnly: true,
     secure: config.nodeEnv === 'production',
-    sameSite: 'Lax',
+    sameSite: config.nodeEnv === 'production' ? 'none' : 'lax',
   };
 
   const refreshCookieOptions = {
     expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30d
     httpOnly: true,
     secure: config.nodeEnv === 'production',
-    sameSite: 'Lax',
+    sameSite: config.nodeEnv === 'production' ? 'none' : 'lax',
   };
 
   res.cookie('accessToken', accessToken, cookieOptions);
@@ -131,10 +131,14 @@ export const logout = (req, res) => {
   res.cookie('accessToken', 'loggedout', {
     expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true,
+    secure: config.nodeEnv === 'production',
+    sameSite: config.nodeEnv === 'production' ? 'none' : 'lax',
   });
   res.cookie('refreshToken', 'loggedout', {
     expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true,
+    secure: config.nodeEnv === 'production',
+    sameSite: config.nodeEnv === 'production' ? 'none' : 'lax',
   });
   res.status(200).json({ success: true, message: 'Logged out successfully' });
 };
@@ -317,8 +321,8 @@ export const logoutAll = async (req, res) => {
     user.tokenVersion = (user.tokenVersion || 0) + 1;
     await user.save({ validateBeforeSave: false });
     
-    res.cookie('accessToken', 'loggedout', { expires: new Date(Date.now() + 10 * 1000), httpOnly: true });
-    res.cookie('refreshToken', 'loggedout', { expires: new Date(Date.now() + 10 * 1000), httpOnly: true });
+    res.cookie('accessToken', 'loggedout', { expires: new Date(Date.now() + 10 * 1000), httpOnly: true, secure: config.nodeEnv === 'production', sameSite: config.nodeEnv === 'production' ? 'none' : 'lax' });
+    res.cookie('refreshToken', 'loggedout', { expires: new Date(Date.now() + 10 * 1000), httpOnly: true, secure: config.nodeEnv === 'production', sameSite: config.nodeEnv === 'production' ? 'none' : 'lax' });
     
     res.status(200).json({ success: true, message: 'Logged out of all devices successfully' });
   } catch (error) {
