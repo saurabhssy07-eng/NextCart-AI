@@ -121,7 +121,7 @@ export const createOrder = async (req, res) => {
       });
       await order.save();
       const estDeliveryDate = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-      await new Email(req.user).sendOrderConfirmation(order, estDeliveryDate);
+      new Email(req.user).sendOrderConfirmation(order, estDeliveryDate).catch(err => console.error('Failed to send COD order confirmation email:', err));
     }
 
     res.status(201).json({
@@ -247,7 +247,7 @@ export const updateOrderStatus = async (req, res) => {
       await order.save();
       
       await order.populate('user', 'firstName lastName email');
-      await new Email(order.user).sendOrderStatusUpdate(order);
+      new Email(order.user).sendOrderStatusUpdate(order).catch(err => console.error('Failed to send status update email:', err));
     }
 
     res.status(200).json({
@@ -317,7 +317,7 @@ export const cancelOrder = async (req, res) => {
     await order.save();
 
     await order.populate('user', 'firstName lastName email');
-    await new Email(order.user).sendOrderStatusUpdate(order);
+    new Email(order.user).sendOrderStatusUpdate(order).catch(err => console.error('Failed to send cancel email:', err));
 
     res.status(200).json({
       success: true,

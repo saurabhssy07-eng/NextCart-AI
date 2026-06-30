@@ -49,7 +49,7 @@ class PaymentService {
     
     await order.populate('user', 'firstName lastName email');
     const estDeliveryDate = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-    await new Email(order.user).sendPaymentSuccess(order, estDeliveryDate);
+    new Email(order.user).sendPaymentSuccess(order, estDeliveryDate).catch(err => console.error('Failed to send payment success email:', err));
     
     return order;
   }
