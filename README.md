@@ -1,12 +1,25 @@
-# NextCart AI — Production-Grade E-Commerce Platform
+<div align="center">
+  <img src="https://via.placeholder.com/1200x400/0f172a/3b82f6?text=NextCart+AI+-+Intelligent+E-Commerce" alt="NextCart AI Cover" width="100%" />
 
-[![Node.js](https://img.shields.io/badge/Node.js-18+-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
-[![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-MERN-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
-[![Gemini](https://img.shields.io/badge/Google_Gemini-AI_Engine-8E75C2?style=for-the-badge&logo=google-gemini&logoColor=white)](https://deepmind.google/technologies/gemini/)
-[![Razorpay](https://img.shields.io/badge/Razorpay-Secure_Payments-02C39A?style=for-the-badge&logo=razorpay&logoColor=white)](https://razorpay.com/)
+  <h1>🛒 NextCart AI</h1>
+  <p><strong>A Production-Grade, AI-Powered Full-Stack E-Commerce Platform</strong></p>
 
-NextCart AI is a high-performance, developer-grade full-stack e-commerce application. It goes beyond the basic MERN template by implementing advanced features like **decoupled AI services (Google Gemini API with a robust fallback NLP engine)**, **stateless response caching**, **variant inventories**, **in-browser product comparisons**, and **secure third-party payment gateways with state checking**.
+  [![Live Demo](https://img.shields.io/badge/Live_Demo-View_Website-blue?style=for-the-badge&logo=vercel)](https://next-cart-ai.vercel.app/)
+  [![GitHub License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](https://choosealicense.com/licenses/mit/)
+  <br />
+  
+  [![React](https://img.shields.io/badge/React_18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
+  [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+  [![Node.js](https://img.shields.io/badge/Node.js_18-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+  [![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)](https://expressjs.com/)
+  [![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+  [![Google Gemini](https://img.shields.io/badge/Google_Gemini-8E75C2?style=for-the-badge&logo=google-bard&logoColor=white)](https://deepmind.google/technologies/gemini/)
+  [![Razorpay](https://img.shields.io/badge/Razorpay-02C39A?style=for-the-badge&logo=razorpay&logoColor=white)](https://razorpay.com/)
+</div>
+
+---
+
+**NextCart AI** is a high-performance, developer-grade full-stack e-commerce application. It goes beyond the basic MERN template by implementing advanced features like **decoupled AI services (Google Gemini API with a robust fallback NLP engine)**, **stateless response caching**, **variant inventories**, **in-browser product comparisons**, and **secure third-party payment gateways with state checking**.
 
 Designed specifically as a flagship portfolio project, NextCart AI demonstrates clean code architecture, database modeling, RESTful API design, and production hardening.
 
