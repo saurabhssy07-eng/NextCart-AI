@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://via.placeholder.com/1200x400/0f172a/3b82f6?text=NextCart+AI+-+Intelligent+E-Commerce" alt="NextCart AI Cover" width="100%" />
+  <img src="./screenshots/landing_page.png" alt="NextCart AI Cover" width="100%" />
 
   <h1>🛒 NextCart AI</h1>
   <p><strong>A Production-Grade, AI-Powered Full-Stack E-Commerce Platform</strong></p>
@@ -22,6 +22,24 @@
 **NextCart AI** is a high-performance, developer-grade full-stack e-commerce application. It goes beyond the basic MERN template by implementing advanced features like **decoupled AI services (Google Gemini API with a robust fallback NLP engine)**, **stateless response caching**, **variant inventories**, **in-browser product comparisons**, and **secure third-party payment gateways with state checking**.
 
 Designed specifically as a flagship portfolio project, NextCart AI demonstrates clean code architecture, database modeling, RESTful API design, and production hardening.
+
+---
+
+## 📸 Application Screenshots
+
+<div align="center">
+  <img src="./screenshots/landing_page.png" width="48%" alt="Landing Page" />
+  <img src="./screenshots/products.png" width="48%" alt="Products View" />
+  <br/><br/>
+  <img src="./screenshots/ai_assistant.png" width="48%" alt="AI Assistant" />
+  <img src="./screenshots/order.png" width="48%" alt="Order Checkout" />
+  <br/><br/>
+  <img src="./screenshots/profiledashboard.png" width="48%" alt="Profile Dashboard" />
+  <img src="./screenshots/security_setting.png" width="48%" alt="Security Settings" />
+  <br/><br/>
+  <img src="./screenshots/featured_brands.png" width="48%" alt="Featured Brands" />
+  <img src="./screenshots/signuppage.png" width="48%" alt="Signup Page" />
+</div>
 
 ---
 
