@@ -1,5 +1,5 @@
 <div align="center">
-  ![NextCart AI Cover](https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/landing_page.png?v=final)
+  <img src="https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/landing_page.png?v=final" alt="NextCart AI Cover" width="100%" />
 
   <h1>🛒 NextCart AI</h1>
   <p><strong>A Production-Grade, AI-Powered Full-Stack E-Commerce Platform</strong></p>
