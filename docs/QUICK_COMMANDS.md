@@ -243,7 +243,7 @@ Update with your MongoDB connection string:
 ```env
 NODE_ENV=development
 PORT=5000
-MONGODB_URI=mongodb+srv://nextcart_user:YOUR_PASSWORD@cluster0.mongodb.net/nextcart?retryWrites=true&w=majority
+MONGODB_URI=<YOUR_MONGODB_CONNECTION_STRING>
 JWT_SECRET=dev_jwt_secret_12345
 JWT_REFRESH_SECRET=dev_refresh_secret_12345
 FRONTEND_URL=http://localhost:5173

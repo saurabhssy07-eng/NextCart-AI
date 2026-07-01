@@ -266,7 +266,7 @@ app.listen(PORT, () => {
 ```env
 NODE_ENV=development
 PORT=5000
-MONGODB_URI=mongodb+srv://nextcart_user:YOUR_PASSWORD@cluster0.mongodb.net/nextcart?retryWrites=true&w=majority
+MONGODB_URI=<YOUR_MONGODB_CONNECTION_STRING>
 JWT_SECRET=dev_jwt_secret_12345_change_in_production
 JWT_EXPIRE=1h
 JWT_REFRESH_SECRET=dev_refresh_secret_12345_change_in_production
@@ -498,7 +498,7 @@ Date:   June 18, 2026
 
 Open `backend/.env.local` and update:
 ```
-MONGODB_URI=mongodb+srv://nextcart_user:YOUR_PASSWORD@cluster0.mongodb.net/nextcart?retryWrites=true&w=majority
+MONGODB_URI=<YOUR_MONGODB_CONNECTION_STRING>
 ```
 
 Replace `YOUR_PASSWORD` with the password you generated.

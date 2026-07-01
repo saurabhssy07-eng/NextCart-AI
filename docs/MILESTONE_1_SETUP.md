@@ -1152,7 +1152,7 @@ mongodb+srv://nextcart_user:PASSWORD@cluster0.mongodb.net/nextcart?retryWrites=t
 ### Step 5: Update .env File
 Add to `backend/.env.local`:
 ```env
-MONGODB_URI=mongodb+srv://nextcart_user:YOUR_PASSWORD@cluster0.mongodb.net/nextcart?retryWrites=true&w=majority
+MONGODB_URI=<YOUR_MONGODB_CONNECTION_STRING>
 ```
 
 ---

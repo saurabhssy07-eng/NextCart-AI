@@ -451,7 +451,7 @@ Create in `backend` folder (DO NOT COMMIT):
 NODE_ENV=development
 PORT=5000
 
-MONGODB_URI=mongodb+srv://nextcart_user:YOUR_PASSWORD@cluster0.mongodb.net/nextcart?retryWrites=true&w=majority
+MONGODB_URI=<YOUR_MONGODB_CONNECTION_STRING>
 
 JWT_SECRET=dev_jwt_secret_12345_change_in_production
 JWT_EXPIRE=1h
@@ -641,7 +641,7 @@ git log
 
 **Connection String Format:**
 ```
-mongodb+srv://nextcart_user:YOUR_PASSWORD@cluster0.mongodb.net/nextcart?retryWrites=true&w=majority
+<YOUR_MONGODB_CONNECTION_STRING>
 ```
 
 **Enable Network Access:**

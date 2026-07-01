@@ -692,7 +692,7 @@ NODE_ENV=development
 PORT=5000
 HOST=localhost
 
-MONGODB_URI=mongodb+srv://nextcart_user:YOUR_PASSWORD@cluster0.mongodb.net/nextcart?retryWrites=true&w=majority
+MONGODB_URI=<YOUR_MONGODB_CONNECTION_STRING>
 
 JWT_SECRET=dev_jwt_secret_key_12345_change_this
 JWT_EXPIRE=1h
