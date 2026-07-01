@@ -26,6 +26,13 @@ Designed specifically as a flagship portfolio project, NextCart AI demonstrates 
 
 ---
 
+## 🎥 Quick Demo
+
+<!-- TODO: Replace the placeholder image below with your actual 20-30 second Demo GIF when you record it! -->
+![NextCart AI Demo](https://raw.githubusercontent.com/saurabhssy07-eng/NextCart-AI/main/screenshots/landing_page.png?v=final)
+
+---
+
 ## 📸 Application Screenshots
 
 | | |
