@@ -5,6 +5,7 @@
   <p><strong>A Production-Grade, AI-Powered Full-Stack E-Commerce Platform</strong></p>
 
   [![Live Demo](https://img.shields.io/badge/Live_Demo-View_Website-blue?style=for-the-badge&logo=vercel)](https://next-cart-ai.vercel.app/)
+  [![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-black?style=for-the-badge&logo=github)](https://github.com/saurabhssy07-eng/NextCart-AI)
   [![GitHub License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](https://choosealicense.com/licenses/mit/)
   <br />
   
@@ -204,8 +205,8 @@ erDiagram
 
 ### 1. Clone the repository
 ```bash
-git clone <repository_url>
-cd E_commerce_website
+git clone https://github.com/saurabhssy07-eng/NextCart-AI.git
+cd NextCart-AI
 ```
 
 ### 2. Configure Backend

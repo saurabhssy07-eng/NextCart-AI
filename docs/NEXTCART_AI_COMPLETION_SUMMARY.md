@@ -387,7 +387,7 @@ npm run dev
 
 ### MongoDB Connection
 - ✅ Already configured in `.env.local`
-- ✅ URI: `mongodb+srv://nextcart_user:nextcart2525@cluster0.shmvi2s.mongodb.net/nextcart_ai`
+- ✅ URI: `mongodb+srv://nextcart_user:YOUR_PASSWORD@cluster0.shmvi2s.mongodb.net/nextcart_ai`
 - ✅ Status: Connected ✅
 
 ---
@@ -572,7 +572,7 @@ npm run dev
 ```env
 NODE_ENV=development
 PORT=5000
-MONGODB_URI=mongodb+srv://nextcart_user:nextcart2525@cluster0.shmvi2s.mongodb.net/nextcart_ai?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://nextcart_user:YOUR_PASSWORD@cluster0.shmvi2s.mongodb.net/nextcart_ai?retryWrites=true&w=majority
 JWT_SECRET=dev-jwt-secret-key-12345
 JWT_REFRESH_SECRET=dev-refresh-secret-key-12345
 FRONTEND_URL=http://localhost:5173
